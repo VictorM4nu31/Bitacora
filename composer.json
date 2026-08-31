@@ -18,6 +18,7 @@
         "laravel/framework": "^13.17",
         "laravel/tinker": "^3.0",
         "laravel/wayfinder": "^0.1.14",
+        "nativephp/mobile": "^4.3",
         "sematico/laravel-inertia-i18n": "^0.1.0",
         "spatie/laravel-permission": "^8.3"
     },
