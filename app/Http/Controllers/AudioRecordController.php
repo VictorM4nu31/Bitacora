@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\AudioRecordStatus;
 use App\Http\Requests\StoreAudioRequest;
+use App\Jobs\TranscribeAudioJob;
 use App\Models\AudioRecord;
 use App\Models\ServiceOrder;
 use Illuminate\Http\JsonResponse;
@@ -39,6 +40,8 @@ class AudioRecordController extends Controller
             'locale' => $request->user()->locale ?? 'es',
             'status' => AudioRecordStatus::Uploaded,
         ]);
+
+        TranscribeAudioJob::dispatch($audio);
 
         return response()->json([
             'id' => $audio->id,

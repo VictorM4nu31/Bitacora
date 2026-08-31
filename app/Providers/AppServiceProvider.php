@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Services\Providers\FakeTranscriptionProvider;
+use App\Services\Providers\LocalWhisperTranscriptionProvider;
+use App\Services\Providers\TranscriptionProvider;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +18,20 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->bindTranscriptionProvider();
+    }
+
+    /**
+     * Resolve the transcription provider from the configured driver.
+     */
+    protected function bindTranscriptionProvider(): void
+    {
+        $this->app->bind(TranscriptionProvider::class, function ($app) {
+            return match (config('ai.transcription.driver')) {
+                'local' => new LocalWhisperTranscriptionProvider(config('ai.transcription.local')),
+                default => new FakeTranscriptionProvider,
+            };
+        });
     }
 
     /**

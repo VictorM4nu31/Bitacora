@@ -7,10 +7,12 @@ use App\Models\Customer;
 use App\Models\ServiceOrder;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 
 test('a technician can upload a voice note to their service order', function () {
     Storage::fake('local');
+    Queue::fake();
 
     $company = Company::factory()->create();
     $customer = Customer::factory()->forCompany($company)->create();

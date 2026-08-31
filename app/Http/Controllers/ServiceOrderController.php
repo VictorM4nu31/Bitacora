@@ -64,7 +64,13 @@ class ServiceOrderController extends Controller
         $audioRecords = $serviceOrder
             ->audioRecords()
             ->orderByDesc('created_at')
-            ->get();
+            ->get()
+            ->map(fn ($audio) => [
+                'id' => $audio->id,
+                'status' => $audio->status->value,
+                'duration_ms' => $audio->duration_ms,
+                'statusUrl' => route('audio-records.status', $audio),
+            ]);
 
         return Inertia::render('service_orders/show', [
             'order' => $serviceOrder,

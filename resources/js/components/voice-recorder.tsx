@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
@@ -6,6 +6,8 @@ type AudioItem = {
     id: number;
     status: string;
     duration_ms: number | null;
+    statusUrl?: string;
+    transcript?: string | null;
 };
 
 type Props = {
@@ -45,6 +47,7 @@ export default function VoiceRecorder({ audioUrl, initial }: Props) {
     const streamRef = useRef<MediaStream | null>(null);
     const timerRef = useRef<number | null>(null);
     const startTimeRef = useRef<number>(0);
+    const pollingRef = useRef<number | null>(null);
 
     function startRecording() {
         setError(null);
@@ -92,6 +95,41 @@ export default function VoiceRecorder({ audioUrl, initial }: Props) {
             });
     }
 
+    useEffect(() => {
+        const active = items.filter(
+            (item) => item.statusUrl && (item.status === 'uploaded' || item.status === 'processing'),
+        );
+
+        if (active.length === 0) return;
+
+        const poll = async () => {
+            for (const item of active) {
+                if (!item.statusUrl) continue;
+                try {
+                    const res = await fetch(item.statusUrl, { headers: { Accept: 'application/json' } });
+                    if (!res.ok) continue;
+                    const data = (await res.json()) as AudioItem & { statusLabel?: string };
+                    setItems((prev) =>
+                        prev.map((i) =>
+                            i.id === data.id
+                                ? { ...i, status: data.status, transcript: data.transcript ?? i.transcript }
+                                : i,
+                        ),
+                    );
+                } catch {
+                    // network issues are tolerated; retry on next tick
+                }
+            }
+        };
+
+        void poll();
+        pollingRef.current = window.setInterval(poll, 2000);
+
+        return () => {
+            if (pollingRef.current) window.clearInterval(pollingRef.current);
+        };
+    }, [items]);
+
     function stopRecording() {
         if (timerRef.current) window.clearInterval(timerRef.current);
         mediaRecorderRef.current?.stop();
@@ -117,9 +155,13 @@ export default function VoiceRecorder({ audioUrl, initial }: Props) {
                 throw new Error('No se pudo subir la nota de voz.');
             }
 
-            const data = (await response.json()) as { id: number; status: string };
+            const data = (await response.json()) as {
+                id: number;
+                status: string;
+                statusUrl: string;
+            };
             setItems((prev) => [
-                { id: data.id, status: data.status, duration_ms: duration },
+                { id: data.id, status: data.status, duration_ms: duration, statusUrl: data.statusUrl },
                 ...prev,
             ]);
             setPhase('done');
@@ -165,17 +207,24 @@ export default function VoiceRecorder({ audioUrl, initial }: Props) {
                     {items.map((item) => (
                         <li
                             key={item.id}
-                            className="border-muted flex items-center justify-between rounded-lg border px-3 py-2 text-sm"
+                            className="border-muted rounded-lg border px-3 py-2 text-sm"
                         >
-                            <span className="text-muted-foreground">
-                                Nota de voz
-                                {item.duration_ms
-                                    ? ` (${Math.round(item.duration_ms / 1000)}s)`
-                                    : ''}
-                            </span>
-                            <Badge variant="secondary" className={STATUS_STYLES[item.status]}>
-                                {STATUS_LABELS[item.status] ?? item.status}
-                            </Badge>
+                            <div className="flex items-center justify-between">
+                                <span className="text-muted-foreground">
+                                    Nota de voz
+                                    {item.duration_ms
+                                        ? ` (${Math.round(item.duration_ms / 1000)}s)`
+                                        : ''}
+                                </span>
+                                <Badge variant="secondary" className={STATUS_STYLES[item.status]}>
+                                    {STATUS_LABELS[item.status] ?? item.status}
+                                </Badge>
+                            </div>
+                            {item.status === 'transcribed' && item.transcript && (
+                                <p className="text-foreground mt-2 line-clamp-3 whitespace-pre-wrap">
+                                    {item.transcript}
+                                </p>
+                            )}
                         </li>
                     ))}
                 </ul>
