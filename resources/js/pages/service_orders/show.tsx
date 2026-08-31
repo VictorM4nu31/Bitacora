@@ -2,6 +2,7 @@ import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { useState, type FormEvent } from 'react';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
+import VoiceRecorder from '@/components/voice-recorder';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -39,11 +40,19 @@ type OrderDetail = {
     technician: { id: number; name: string } | null;
 };
 
+type AudioItem = {
+    id: number;
+    status: string;
+    duration_ms: number | null;
+};
+
 type PageProps = {
     order: OrderDetail;
     statuses: { value: string; label: string }[];
     customers: { id: number; name: string }[];
     equipment: { id: number; name: string; customer_id: number }[];
+    audioUrl: string;
+    audioRecords: AudioItem[];
 };
 
 const STATUS_STYLES: Record<string, string> = {
@@ -54,7 +63,8 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 export default function ServiceOrderShow() {
-    const { order, statuses, customers, equipment } = usePage<PageProps>().props;
+    const { order, statuses, customers, equipment, audioUrl, audioRecords } =
+        usePage<PageProps>().props;
     const [editOpen, setEditOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
 
@@ -255,6 +265,15 @@ export default function ServiceOrderShow() {
                             <span className="text-muted-foreground">Completado:</span>{' '}
                             {order.completed_at ? new Date(order.completed_at).toLocaleString() : '—'}
                         </p>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Nota de voz</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <VoiceRecorder audioUrl={audioUrl} initial={audioRecords} />
                     </CardContent>
                 </Card>
             </div>
