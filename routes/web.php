@@ -5,6 +5,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\EquipmentController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\MaintenanceScheduleController;
+use App\Http\Controllers\MobileController;
 use App\Http\Controllers\ServiceOrderController;
 use App\Http\Controllers\ServicePhotoController;
 use App\Http\Controllers\ServiceReportController;
@@ -52,6 +53,15 @@ Route::middleware(['auth', 'verified', SetLocale::class])->group(function () {
 Route::middleware('signed')->group(function () {
     Route::get('shared/{service_report}', [ServiceReportController::class, 'shared'])
         ->name('reports.shared');
+});
+
+Route::get('mobile/login', [MobileController::class, 'login'])->name('mobile.login');
+Route::post('mobile/login', [MobileController::class, 'submitLogin'])->name('mobile.login.submit');
+
+Route::middleware(['auth'])->prefix('mobile')->name('mobile.')->group(function () {
+    Route::get('/', [MobileController::class, 'index'])->name('index');
+    Route::get('services/{service_order}', [MobileController::class, 'show'])->name('show');
+    Route::post('logout', [MobileController::class, 'logout'])->name('logout');
 });
 
 require __DIR__.'/settings.php';
