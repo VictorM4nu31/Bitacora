@@ -61,6 +61,22 @@ type Report = {
     total_cost: string | number | null;
 };
 
+type Audit = {
+    events: {
+        id: number;
+        action: string;
+        user_name: string | null;
+        new_status: string | null;
+        created_at: string;
+    }[];
+    ai: {
+        transcription_ms: number | null;
+        analysis_ms: number | null;
+        transcription_provider: string | null;
+        analysis_provider: string | null;
+    } | null;
+};
+
 type PageProps = {
     order: OrderDetail;
     statuses: { value: string; label: string }[];
@@ -71,6 +87,7 @@ type PageProps = {
     photoUploadUrl: string;
     photos: { id: number; original_name: string; url: string }[];
     report: Report | null;
+    audit: Audit | null;
     reportOptions: {
         types: { value: string; label: string }[];
         updateUrl: string | null;
@@ -99,6 +116,7 @@ export default function ServiceOrderShow() {
         photos,
         report,
         reportOptions,
+        audit,
     } = usePage<PageProps>().props;
     const [editOpen, setEditOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
@@ -336,6 +354,49 @@ export default function ServiceOrderShow() {
                         <PhotoGallery photoUploadUrl={photoUploadUrl} initial={photos} />
                     </CardContent>
                 </Card>
+
+                {audit && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Auditoría</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-3 text-sm">
+                            {audit.ai && (
+                                <div className="grid gap-1 text-xs">
+                                    <p className="text-muted-foreground">
+                                        Transcripción: {audit.ai.transcription_provider ?? '—'} ·{' '}
+                                        {audit.ai.transcription_ms ?? 0} ms
+                                    </p>
+                                    <p className="text-muted-foreground">
+                                        Análisis: {audit.ai.analysis_provider ?? '—'} ·{' '}
+                                        {audit.ai.analysis_ms ?? 0} ms
+                                    </p>
+                                </div>
+                            )}
+                            {audit.events.length === 0 ? (
+                                <p className="text-muted-foreground text-sm">
+                                    Sin eventos registrados.
+                                </p>
+                            ) : (
+                                <ul className="space-y-2">
+                                    {audit.events.map((event) => (
+                                        <li
+                                            key={event.id}
+                                            className="border-muted flex items-center justify-between rounded-lg border px-3 py-2 text-sm"
+                                        >
+                                            <span className="text-muted-foreground">
+                                                {event.action} — {event.created_at}
+                                            </span>
+                                            <span className="text-muted-foreground text-xs">
+                                                {event.user_name ?? 'Sistema (IA)'}
+                                            </span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </CardContent>
+                    </Card>
+                )}
             </div>
         </>
     );
