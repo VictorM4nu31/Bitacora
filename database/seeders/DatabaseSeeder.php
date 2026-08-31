@@ -16,6 +16,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->call(RolesAndPermissionsSeeder::class);
+
         $company = Company::factory()->create([
             'name' => 'Servicios Técnicos Demo',
             'slug' => 'servicios-tecnicos-demo',
