@@ -1,6 +1,5 @@
 <?php
 
-use App\Enums\UserRole;
 use App\Models\Company;
 use App\Models\User;
 
@@ -19,17 +18,18 @@ test('a user belongs to a company', function () {
     expect($user->company->id)->toBe($company->id);
 });
 
-test('a user defaults to the technician role', function () {
-    $user = User::factory()->create();
+test('a user assigned the technician role has that role', function () {
+    $user = User::factory()->technician()->create();
 
-    expect($user->role)->toBe(UserRole::Technician);
+    expect($user->hasRole('technician'))->toBeTrue()
+        ->and($user->isAdmin())->toBeFalse();
 });
 
-test('a user can be created as an admin', function () {
+test('a user assigned the admin role is an admin', function () {
     $user = User::factory()->admin()->create();
 
-    expect($user->role)->toBe(UserRole::Admin);
-    expect($user->isAdmin())->toBeTrue();
+    expect($user->hasRole('admin'))->toBeTrue()
+        ->and($user->isAdmin())->toBeTrue();
 });
 
 test('a company exposes its slug and timezone', function () {
