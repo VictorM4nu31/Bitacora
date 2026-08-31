@@ -1,4 +1,5 @@
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { useTranslation } from '@sematico/laravel-inertia-i18n-react';
 import { useState, type FormEvent } from 'react';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
@@ -34,6 +35,7 @@ type PageProps = {
 };
 
 export default function CustomerShow() {
+    const { t } = useTranslation();
     const { customer } = usePage<PageProps>().props;
     const [editOpen, setEditOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
@@ -63,32 +65,32 @@ export default function CustomerShow() {
 
     return (
         <>
-            <Head title={`Cliente - ${customer.name}`} />
+            <Head title={`${t('Customer')} - ${customer.name}`} />
 
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <Link href={index.url()} className="text-muted-foreground text-sm">
-                    ← Volver a clientes
+                    ← {t('Back to customers')}
                 </Link>
 
                 <div className="flex items-center justify-between">
                     <Heading
                         title={customer.name}
-                        description={customer.email ?? customer.phone ?? 'Sin contacto'}
+                        description={customer.email ?? customer.phone ?? t('No contact')}
                     />
 
                     <div className="flex gap-2">
                         <Dialog open={editOpen} onOpenChange={setEditOpen}>
                             <DialogTrigger asChild>
-                                <Button variant="outline">Editar</Button>
+                                <Button variant="outline">{t('Edit')}</Button>
                             </DialogTrigger>
                             <DialogContent>
                                 <DialogHeader>
-                                    <DialogTitle>Editar cliente</DialogTitle>
+                                    <DialogTitle>{t('Edit customer')}</DialogTitle>
                                 </DialogHeader>
 
                                 <form onSubmit={submitEdit} className="space-y-4">
                                     <div className="grid gap-2">
-                                        <Label htmlFor="name">Nombre *</Label>
+                                        <Label htmlFor="name">{t('Name')} *</Label>
                                         <Input
                                             id="name"
                                             value={form.data.name}
@@ -98,7 +100,7 @@ export default function CustomerShow() {
                                     </div>
 
                                     <div className="grid gap-2">
-                                        <Label htmlFor="phone">Teléfono</Label>
+                                        <Label htmlFor="phone">{t('Phone')}</Label>
                                         <Input
                                             id="phone"
                                             value={form.data.phone}
@@ -108,7 +110,7 @@ export default function CustomerShow() {
                                     </div>
 
                                     <div className="grid gap-2">
-                                        <Label htmlFor="email">Correo</Label>
+                                        <Label htmlFor="email">{t('Email')}</Label>
                                         <Input
                                             id="email"
                                             type="email"
@@ -119,7 +121,7 @@ export default function CustomerShow() {
                                     </div>
 
                                     <div className="grid gap-2">
-                                        <Label htmlFor="address">Dirección</Label>
+                                        <Label htmlFor="address">{t('Address')}</Label>
                                         <Input
                                             id="address"
                                             value={form.data.address}
@@ -129,7 +131,7 @@ export default function CustomerShow() {
                                     </div>
 
                                     <div className="grid gap-2">
-                                        <Label htmlFor="notes">Notas</Label>
+                                        <Label htmlFor="notes">{t('Notes')}</Label>
                                         <textarea
                                             id="notes"
                                             value={form.data.notes}
@@ -145,10 +147,10 @@ export default function CustomerShow() {
                                             variant="outline"
                                             onClick={() => setEditOpen(false)}
                                         >
-                                            Cancelar
+                                            {t('Cancel')}
                                         </Button>
                                         <Button type="submit" disabled={form.processing}>
-                                            Guardar
+                                            {t('Save')}
                                         </Button>
                                     </div>
                                 </form>
@@ -157,25 +159,24 @@ export default function CustomerShow() {
 
                         <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
                             <DialogTrigger asChild>
-                                <Button variant="destructive">Eliminar</Button>
+                                <Button variant="destructive">{t('Delete')}</Button>
                             </DialogTrigger>
                             <DialogContent>
                                 <DialogHeader>
-                                    <DialogTitle>Eliminar cliente</DialogTitle>
+                                    <DialogTitle>{t('Delete customer')}</DialogTitle>
                                 </DialogHeader>
                                 <p className="text-muted-foreground text-sm">
-                                    Se eliminará «{customer.name}». Esta acción no se puede
-                                    deshacer.
+                                    {t('This will permanently delete')} «{customer.name}».
                                 </p>
                                 <div className="flex justify-end gap-2">
                                     <Button
                                         variant="outline"
                                         onClick={() => setDeleteOpen(false)}
                                     >
-                                        Cancelar
+                                        {t('Cancel')}
                                     </Button>
                                     <Button variant="destructive" onClick={confirmDelete}>
-                                        Eliminar
+                                        {t('Delete')}
                                     </Button>
                                 </div>
                             </DialogContent>
@@ -185,24 +186,24 @@ export default function CustomerShow() {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Información</CardTitle>
+                        <CardTitle>{t('Information')}</CardTitle>
                     </CardHeader>
                     <CardContent className="grid gap-1 text-sm">
                         <p>
-                            <span className="text-muted-foreground">Teléfono:</span>{' '}
+                            <span className="text-muted-foreground">{t('Phone')}:</span>{' '}
                             {customer.phone ?? '—'}
                         </p>
                         <p>
-                            <span className="text-muted-foreground">Correo:</span>{' '}
+                            <span className="text-muted-foreground">{t('Email')}:</span>{' '}
                             {customer.email ?? '—'}
                         </p>
                         <p>
-                            <span className="text-muted-foreground">Dirección:</span>{' '}
+                            <span className="text-muted-foreground">{t('Address')}:</span>{' '}
                             {customer.address ?? '—'}
                         </p>
                         {customer.notes && (
                             <p>
-                                <span className="text-muted-foreground">Notas:</span>{' '}
+                                <span className="text-muted-foreground">{t('Notes')}:</span>{' '}
                                 {customer.notes}
                             </p>
                         )}
@@ -215,6 +216,6 @@ export default function CustomerShow() {
 
 CustomerShow.layout = {
     breadcrumbs: [
-        { title: 'Clientes', href: index.url() },
+        { title: 'Customers', href: index.url() },
     ],
 };

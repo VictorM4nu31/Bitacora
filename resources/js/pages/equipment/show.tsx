@@ -1,6 +1,6 @@
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { useTranslation } from '@sematico/laravel-inertia-i18n-react';
 import { useState, type FormEvent } from 'react';
-import { toast } from 'sonner';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
@@ -68,6 +68,7 @@ type PageProps = {
 };
 
 export default function EquipmentShow() {
+    const { t } = useTranslation();
     const {
         equipment,
         history,
@@ -117,42 +118,42 @@ export default function EquipmentShow() {
         router.delete(destroy.url({ equipment: equipment.id }));
     }
 
-    const typeLabel = types.find((t) => t.value === equipment.type)?.label ?? equipment.type;
+    const typeLabel = types.find((item) => item.value === equipment.type)?.label ?? equipment.type;
 
     return (
         <>
-            <Head title={`Equipo - ${equipment.name}`} />
+            <Head title={`${t('Equipment')} - ${equipment.name}`} />
 
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <Link href={index.url()} className="text-muted-foreground text-sm">
-                    ← Volver a equipos
+                    ← {t('Back to equipment')}
                 </Link>
 
                 <div className="flex items-center justify-between">
                     <Heading
                         title={equipment.name}
-                        description={equipment.customer?.name ?? 'Sin cliente'}
+                        description={equipment.customer?.name ?? t('No customer')}
                     />
 
                     <div className="flex gap-2">
                         <Dialog open={editOpen} onOpenChange={setEditOpen}>
                             <DialogTrigger asChild>
-                                <Button variant="outline">Editar</Button>
+                                <Button variant="outline">{t('Edit')}</Button>
                             </DialogTrigger>
                             <DialogContent>
                                 <DialogHeader>
-                                    <DialogTitle>Editar equipo</DialogTitle>
+                                    <DialogTitle>{t('Edit equipment')}</DialogTitle>
                                 </DialogHeader>
 
                                 <form onSubmit={submitEdit} className="space-y-4">
                                     <div className="grid gap-2">
-                                        <Label htmlFor="customer">Cliente *</Label>
+                                        <Label htmlFor="customer">{t('Customer')} *</Label>
                                         <Select
                                             value={String(form.data.customer_id)}
                                             onValueChange={(v) => form.setData('customer_id', v)}
                                         >
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Selecciona un cliente" />
+                                                <SelectValue placeholder={t('Select a customer')} />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {customers.map((customer) => (
@@ -169,7 +170,7 @@ export default function EquipmentShow() {
                                     </div>
 
                                     <div className="grid gap-2">
-                                        <Label htmlFor="name">Nombre *</Label>
+                                        <Label htmlFor="name">{t('Name')} *</Label>
                                         <Input
                                             id="name"
                                             value={form.data.name}
@@ -179,13 +180,13 @@ export default function EquipmentShow() {
                                     </div>
 
                                     <div className="grid gap-2">
-                                        <Label htmlFor="type">Tipo *</Label>
+                                        <Label htmlFor="type">{t('Type')} *</Label>
                                         <Select
                                             value={String(form.data.type)}
                                             onValueChange={(v) => form.setData('type', v)}
                                         >
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Selecciona un tipo" />
+                                                <SelectValue placeholder={t('Select a type')} />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {types.map((type) => (
@@ -199,7 +200,7 @@ export default function EquipmentShow() {
                                     </div>
 
                                     <div className="grid gap-2">
-                                        <Label htmlFor="brand">Marca</Label>
+                                        <Label htmlFor="brand">{t('Brand')}</Label>
                                         <Input
                                             id="brand"
                                             value={form.data.brand}
@@ -208,7 +209,7 @@ export default function EquipmentShow() {
                                     </div>
 
                                     <div className="grid gap-2">
-                                        <Label htmlFor="model">Modelo</Label>
+                                        <Label htmlFor="model">{t('Model')}</Label>
                                         <Input
                                             id="model"
                                             value={form.data.model}
@@ -217,7 +218,7 @@ export default function EquipmentShow() {
                                     </div>
 
                                     <div className="grid gap-2">
-                                        <Label htmlFor="serial">Número de serie</Label>
+                                        <Label htmlFor="serial">{t('Serial number')}</Label>
                                         <Input
                                             id="serial"
                                             value={form.data.serial_number}
@@ -226,7 +227,7 @@ export default function EquipmentShow() {
                                     </div>
 
                                     <div className="grid gap-2">
-                                        <Label htmlFor="notes">Notas</Label>
+                                        <Label htmlFor="notes">{t('Notes')}</Label>
                                         <textarea
                                             id="notes"
                                             value={form.data.notes}
@@ -241,10 +242,10 @@ export default function EquipmentShow() {
                                             variant="outline"
                                             onClick={() => setEditOpen(false)}
                                         >
-                                            Cancelar
+                                            {t('Cancel')}
                                         </Button>
                                         <Button type="submit" disabled={form.processing}>
-                                            Guardar
+                                            {t('Save')}
                                         </Button>
                                     </div>
                                 </form>
@@ -253,25 +254,24 @@ export default function EquipmentShow() {
 
                         <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
                             <DialogTrigger asChild>
-                                <Button variant="destructive">Eliminar</Button>
+                                <Button variant="destructive">{t('Delete')}</Button>
                             </DialogTrigger>
                             <DialogContent>
                                 <DialogHeader>
-                                    <DialogTitle>Eliminar equipo</DialogTitle>
+                                    <DialogTitle>{t('Delete equipment')}</DialogTitle>
                                 </DialogHeader>
                                 <p className="text-muted-foreground text-sm">
-                                    Se eliminará «{equipment.name}». Esta acción no se puede
-                                    deshacer.
+                                    {t('This will permanently delete')} «{equipment.name}».
                                 </p>
                                 <div className="flex justify-end gap-2">
                                     <Button
                                         variant="outline"
                                         onClick={() => setDeleteOpen(false)}
                                     >
-                                        Cancelar
+                                        {t('Cancel')}
                                     </Button>
                                     <Button variant="destructive" onClick={confirmDelete}>
-                                        Eliminar
+                                        {t('Delete')}
                                     </Button>
                                 </div>
                             </DialogContent>
@@ -281,32 +281,32 @@ export default function EquipmentShow() {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Información</CardTitle>
+                        <CardTitle>{t('Information')}</CardTitle>
                     </CardHeader>
                     <CardContent className="grid gap-1 text-sm">
                         <p>
-                            <span className="text-muted-foreground">Cliente:</span>{' '}
+                            <span className="text-muted-foreground">{t('Customer')}:</span>{' '}
                             {equipment.customer?.name ?? '—'}
                         </p>
                         <p>
-                            <span className="text-muted-foreground">Tipo:</span>{' '}
+                            <span className="text-muted-foreground">{t('Type')}:</span>{' '}
                             {typeLabel}
                         </p>
                         <p>
-                            <span className="text-muted-foreground">Marca:</span>{' '}
+                            <span className="text-muted-foreground">{t('Brand')}:</span>{' '}
                             {equipment.brand ?? '—'}
                         </p>
                         <p>
-                            <span className="text-muted-foreground">Modelo:</span>{' '}
+                            <span className="text-muted-foreground">{t('Model')}:</span>{' '}
                             {equipment.model ?? '—'}
                         </p>
                         <p>
-                            <span className="text-muted-foreground">Núm. serie:</span>{' '}
+                            <span className="text-muted-foreground">{t('Serial number')}:</span>{' '}
                             {equipment.serial_number ?? '—'}
                         </p>
                         {equipment.notes && (
                             <p>
-                                <span className="text-muted-foreground">Notas:</span>{' '}
+                                <span className="text-muted-foreground">{t('Notes')}:</span>{' '}
                                 {equipment.notes}
                             </p>
                         )}
@@ -315,7 +315,7 @@ export default function EquipmentShow() {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Mantenimientos programados</CardTitle>
+                        <CardTitle>{t('Scheduled maintenance')}</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <form onSubmit={scheduleMaintenance} className="flex items-end gap-2">
@@ -324,7 +324,7 @@ export default function EquipmentShow() {
                                     htmlFor="interval"
                                     className="text-muted-foreground text-sm"
                                 >
-                                    Cada (días)
+                                    {t('Every (days)')}
                                 </label>
                                 <input
                                     id="interval"
@@ -336,13 +336,13 @@ export default function EquipmentShow() {
                                 />
                             </div>
                             <Button type="submit" disabled={scheduleForm.processing}>
-                                Programar
+                                {t('Schedule')}
                             </Button>
                         </form>
 
                         {maintenance.length === 0 ? (
                             <p className="text-muted-foreground text-sm">
-                                Sin mantenimientos programados para este equipo.
+                                {t('No maintenance scheduled for this equipment.')}
                             </p>
                         ) : (
                             <ul className="space-y-2">
@@ -353,10 +353,10 @@ export default function EquipmentShow() {
                                     >
                                         <div>
                                             <p className="font-medium">
-                                                {item.next_due_at ?? 'Sin fecha'} — cada {item.interval_days} días
+                                                {item.next_due_at ?? t('No date')} — {t('every')} {item.interval_days} {t('days')}
                                             </p>
                                             <p className="text-muted-foreground text-xs">
-                                                {item.enabled ? 'Activo' : 'Pausado'}
+                                                {item.enabled ? t('Active') : t('Paused')}
                                             </p>
                                         </div>
                                         <Button
@@ -364,7 +364,7 @@ export default function EquipmentShow() {
                                             size="sm"
                                             onClick={() => complete(item)}
                                         >
-                                            Marcar realizado
+                                            {t('Mark as done')}
                                         </Button>
                                     </li>
                                 ))}
@@ -375,12 +375,12 @@ export default function EquipmentShow() {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Historial de servicios</CardTitle>
+                        <CardTitle>{t('Service history')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         {history.length === 0 ? (
                             <p className="text-muted-foreground text-sm">
-                                Este equipo aún no tiene servicios registrados.
+                                {t('This equipment has no services yet.')}
                             </p>
                         ) : (
                             <ul className="space-y-2">
@@ -392,14 +392,14 @@ export default function EquipmentShow() {
                                         >
                                             <div>
                                                 <p className="font-medium">
-                                                    {item.customer_name ?? 'Sin cliente'} — {item.date}
+                                                    {item.customer_name ?? t('No customer')} — {item.date}
                                                 </p>
                                                 <p className="text-muted-foreground text-xs">
                                                     {item.report_status === 'finalized'
-                                                        ? 'Con reporte finalizado'
+                                                        ? t('With finalized report')
                                                         : item.report_status === 'draft'
-                                                          ? 'Reporte en borrador'
-                                                          : 'Sin reporte'}
+                                                          ? t('Report draft')
+                                                          : t('No report')}
                                                 </p>
                                             </div>
                                             <Badge variant="secondary">{item.statusLabel}</Badge>
@@ -417,6 +417,6 @@ export default function EquipmentShow() {
 
 EquipmentShow.layout = {
     breadcrumbs: [
-        { title: 'Equipos', href: index.url() },
+        { title: 'Equipment', href: index.url() },
     ],
 };

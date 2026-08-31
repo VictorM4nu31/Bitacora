@@ -1,4 +1,5 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { useTranslation } from '@sematico/laravel-inertia-i18n-react';
 import { useState, type FormEvent } from 'react';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
@@ -48,6 +49,7 @@ type PageProps = {
 };
 
 export default function Equipment() {
+    const { t } = useTranslation();
     const { equipment, customers, types } = usePage<PageProps>().props;
     const [open, setOpen] = useState(false);
 
@@ -75,33 +77,33 @@ export default function Equipment() {
 
     return (
         <>
-            <Head title="Equipos" />
+            <Head title={t('Equipment')} />
 
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div className="flex items-center justify-between">
                     <Heading
-                        title="Equipos"
-                        description="El inventario de equipos de tus clientes"
+                        title={t('Equipment')}
+                        description={t('Your customers equipment inventory')}
                     />
 
                     <Dialog open={open} onOpenChange={setOpen}>
                         <DialogTrigger asChild>
-                            <Button>Nuevo equipo</Button>
+                            <Button>{t('New equipment')}</Button>
                         </DialogTrigger>
                         <DialogContent>
                             <DialogHeader>
-                                <DialogTitle>Nuevo equipo</DialogTitle>
+                                <DialogTitle>{t('New equipment')}</DialogTitle>
                             </DialogHeader>
 
                             <form onSubmit={submit} className="space-y-4">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="customer">Cliente *</Label>
+                                    <Label htmlFor="customer">{t('Customer')} *</Label>
                                     <Select
                                         value={String(form.data.customer_id)}
                                         onValueChange={(v) => form.setData('customer_id', v)}
                                     >
                                         <SelectTrigger>
-                                            <SelectValue placeholder="Selecciona un cliente" />
+                                            <SelectValue placeholder={t('Select a customer')} />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {customers.map((customer) => (
@@ -118,25 +120,25 @@ export default function Equipment() {
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="name">Nombre *</Label>
+                                    <Label htmlFor="name">{t('Name')} *</Label>
                                     <Input
                                         id="name"
                                         value={form.data.name}
                                         onChange={(e) => form.setData('name', e.target.value)}
-                                        placeholder="Ej. Minisplit 1.5 ton"
+                                        placeholder={t('E.g. Mini split 1.5 ton')}
                                         autoFocus
                                     />
                                     <InputError message={form.errors.name} />
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="type">Tipo *</Label>
+                                    <Label htmlFor="type">{t('Type')} *</Label>
                                     <Select
                                         value={String(form.data.type)}
                                         onValueChange={(v) => form.setData('type', v)}
                                     >
                                         <SelectTrigger>
-                                            <SelectValue placeholder="Selecciona un tipo" />
+                                            <SelectValue placeholder={t('Select a type')} />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {types.map((type) => (
@@ -150,7 +152,7 @@ export default function Equipment() {
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="brand">Marca</Label>
+                                    <Label htmlFor="brand">{t('Brand')}</Label>
                                     <Input
                                         id="brand"
                                         value={form.data.brand}
@@ -160,7 +162,7 @@ export default function Equipment() {
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="model">Modelo</Label>
+                                    <Label htmlFor="model">{t('Model')}</Label>
                                     <Input
                                         id="model"
                                         value={form.data.model}
@@ -170,7 +172,7 @@ export default function Equipment() {
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="serial">Número de serie</Label>
+                                    <Label htmlFor="serial">{t('Serial number')}</Label>
                                     <Input
                                         id="serial"
                                         value={form.data.serial_number}
@@ -180,7 +182,7 @@ export default function Equipment() {
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="notes">Notas</Label>
+                                    <Label htmlFor="notes">{t('Notes')}</Label>
                                     <textarea
                                         id="notes"
                                         value={form.data.notes}
@@ -196,10 +198,10 @@ export default function Equipment() {
                                         variant="outline"
                                         onClick={() => setOpen(false)}
                                     >
-                                        Cancelar
+                                        {t('Cancel')}
                                     </Button>
                                     <Button type="submit" disabled={form.processing}>
-                                        Guardar
+                                        {t('Save')}
                                     </Button>
                                 </div>
                             </form>
@@ -210,7 +212,7 @@ export default function Equipment() {
                 <div className="rounded-xl border">
                     {equipment.data.length === 0 ? (
                         <div className="text-muted-foreground p-8 text-center text-sm">
-                            No hay equipos todavía. Crea el primero.
+                            {t('No equipment yet. Create the first one.')}
                         </div>
                     ) : (
                         equipment.data.map((item) => (
@@ -222,7 +224,7 @@ export default function Equipment() {
                                 <div className="min-w-0">
                                     <p className="truncate font-medium">{item.name}</p>
                                     <p className="text-muted-foreground text-sm">
-                                        {item.customer?.name ?? 'Sin cliente'}
+                                        {item.customer?.name ?? t('No customer')}
                                         {item.model ? ` · ${item.brand ?? ''} ${item.model}` : ''}
                                     </p>
                                 </div>
@@ -238,7 +240,7 @@ export default function Equipment() {
 Equipment.layout = {
     breadcrumbs: [
         {
-            title: 'Equipos',
+            title: 'Equipment',
             href: index.url(),
         },
     ],

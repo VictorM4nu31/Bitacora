@@ -1,4 +1,5 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { useTranslation } from '@sematico/laravel-inertia-i18n-react';
 import { useState, type FormEvent } from 'react';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
@@ -50,6 +51,7 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 export default function ServiceOrders() {
+    const { t } = useTranslation();
     const { orders, statuses, customers, equipment } = usePage<PageProps>().props;
     const [open, setOpen] = useState(false);
 
@@ -76,27 +78,27 @@ export default function ServiceOrders() {
 
     return (
         <>
-            <Head title="Servicios" />
+            <Head title={t('Services')} />
 
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div className="flex items-center justify-between">
                     <Heading
-                        title="Servicios"
-                        description="Las órdenes de servicio de tu empresa"
+                        title={t('Services')}
+                        description={t('Your company service orders')}
                     />
 
                     <Dialog open={open} onOpenChange={setOpen}>
                         <DialogTrigger asChild>
-                            <Button>Nuevo servicio</Button>
+                            <Button>{t('New service')}</Button>
                         </DialogTrigger>
                         <DialogContent>
                             <DialogHeader>
-                                <DialogTitle>Nuevo servicio</DialogTitle>
+                                <DialogTitle>{t('New service')}</DialogTitle>
                             </DialogHeader>
 
                             <form onSubmit={submit} className="space-y-4">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="customer">Cliente *</Label>
+                                    <Label htmlFor="customer">{t('Customer')} *</Label>
                                     <Select
                                         value={String(form.data.customer_id)}
                                         onValueChange={(v) => {
@@ -105,7 +107,7 @@ export default function ServiceOrders() {
                                         }}
                                     >
                                         <SelectTrigger>
-                                            <SelectValue placeholder="Selecciona un cliente" />
+                                            <SelectValue placeholder={t('Select a customer')} />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {customers.map((customer) => (
@@ -122,13 +124,13 @@ export default function ServiceOrders() {
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="equipment">Equipo</Label>
+                                    <Label htmlFor="equipment">{t('Equipment')}</Label>
                                     <Select
                                         value={String(form.data.equipment_id)}
                                         onValueChange={(v) => form.setData('equipment_id', v)}
                                     >
                                         <SelectTrigger>
-                                            <SelectValue placeholder="Selecciona un equipo (opcional)" />
+                                            <SelectValue placeholder={t('Select equipment (optional)')} />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {equipment.map((item) => (
@@ -142,7 +144,7 @@ export default function ServiceOrders() {
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="scheduled_at">Fecha programada</Label>
+                                    <Label htmlFor="scheduled_at">{t('Scheduled date')}</Label>
                                     <Input
                                         id="scheduled_at"
                                         type="datetime-local"
@@ -158,10 +160,10 @@ export default function ServiceOrders() {
                                         variant="outline"
                                         onClick={() => setOpen(false)}
                                     >
-                                        Cancelar
+                                        {t('Cancel')}
                                     </Button>
                                     <Button type="submit" disabled={form.processing}>
-                                        Crear
+                                        {t('Create')}
                                     </Button>
                                 </div>
                             </form>
@@ -172,7 +174,7 @@ export default function ServiceOrders() {
                 <div className="rounded-xl border">
                     {orders.data.length === 0 ? (
                         <div className="text-muted-foreground p-8 text-center text-sm">
-                            No hay servicios todavía. Crea el primero.
+                            {t('No services yet. Create the first one.')}
                         </div>
                     ) : (
                         orders.data.map((order) => (
@@ -184,10 +186,10 @@ export default function ServiceOrders() {
                                 <div className="grid grid-cols-1 items-center gap-2 sm:grid-cols-[auto_1fr_auto]">
                                     <div className="min-w-0">
                                         <p className="truncate font-medium">
-                                            {order.customer?.name ?? 'Sin cliente'}
+                                            {order.customer?.name ?? t('No customer')}
                                         </p>
                                         <p className="text-muted-foreground text-sm">
-                                            {order.equipment?.name ?? 'Sin equipo'}
+                                            {order.equipment?.name ?? t('No equipment')}
                                             {order.technician ? ` · ${order.technician.name}` : ''}
                                         </p>
                                     </div>
@@ -210,7 +212,7 @@ export default function ServiceOrders() {
 ServiceOrders.layout = {
     breadcrumbs: [
         {
-            title: 'Servicios',
+            title: 'Services',
             href: index.url(),
         },
     ],

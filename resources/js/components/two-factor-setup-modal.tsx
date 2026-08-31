@@ -1,4 +1,5 @@
 import { Form } from '@inertiajs/react';
+import { useTranslation } from '@sematico/laravel-inertia-i18n-react';
 import { REGEXP_ONLY_DIGITS } from 'input-otp';
 import { Check, Copy, ScanLine } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -252,6 +253,7 @@ export default function TwoFactorSetupModal({
     fetchSetupData,
     errors,
 }: Props) {
+    const { t } = useTranslation();
     const [showVerificationStep, setShowVerificationStep] =
         useState<boolean>(false);
 
@@ -262,27 +264,27 @@ export default function TwoFactorSetupModal({
     }>(() => {
         if (twoFactorEnabled) {
             return {
-                title: 'Two-factor authentication enabled',
+                title: t('Two-factor authentication enabled'),
                 description:
                     'Two-factor authentication is now enabled. Scan the QR code or enter the setup key in your authenticator app.',
-                buttonText: 'Close',
+                buttonText: t('Close'),
             };
         }
 
         if (showVerificationStep) {
             return {
-                title: 'Verify authentication code',
+                title: t('Verify authentication code'),
                 description:
-                    'Enter the 6-digit code from your authenticator app',
-                buttonText: 'Continue',
+                    t('Enter the 6-digit code from your authenticator app'),
+                buttonText: t('Continue'),
             };
         }
 
         return {
-            title: 'Enable two-factor authentication',
+            title: t('Enable two-factor authentication'),
             description:
                 'To finish enabling two-factor authentication, scan the QR code or enter the setup key in your authenticator app',
-            buttonText: 'Continue',
+            buttonText: t('Continue'),
         };
     }, [twoFactorEnabled, showVerificationStep]);
 

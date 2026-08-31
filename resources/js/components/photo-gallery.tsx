@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { useTranslation } from '@sematico/laravel-inertia-i18n-react';
 import { Button } from '@/components/ui/button';
 
 type Photo = {
@@ -18,6 +19,7 @@ function getCookie(name: string): string | null {
 }
 
 export default function PhotoGallery({ photoUploadUrl, initial }: Props) {
+    const { t } = useTranslation();
     const [photos, setPhotos] = useState<Photo[]>(initial);
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -45,14 +47,14 @@ export default function PhotoGallery({ photoUploadUrl, initial }: Props) {
             });
 
             if (!response.ok) {
-                throw new Error('No se pudo subir la foto.');
+                throw new Error('Could not upload the photo.');
             }
 
             const data = (await response.json()) as Photo;
             setPhotos((prev) => [...prev, data]);
             input.value = '';
         } catch {
-            setError('No se pudo subir la foto. Revisa el formato y el tamaño.');
+            setError(t('Could not upload the photo. Check the format and size.'));
         } finally {
             setUploading(false);
         }
@@ -74,16 +76,16 @@ export default function PhotoGallery({ photoUploadUrl, initial }: Props) {
                     disabled={uploading}
                     onClick={() => inputRef.current?.click()}
                 >
-                    Subir foto
+                    {t('Upload photo')}
                 </Button>
-                {uploading && <span className="text-muted-foreground text-sm">Subiendo…</span>}
+                {uploading && <span className="text-muted-foreground text-sm">{t('Uploading…')}</span>}
             </div>
 
             {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
             {photos.length === 0 ? (
                 <p className="text-muted-foreground text-sm">
-                    No hay fotos todavía. Sube evidencia del servicio.
+                    {t('No photos yet. Upload evidence of the service.')}
                 </p>
             ) : (
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">

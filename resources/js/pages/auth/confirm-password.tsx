@@ -1,4 +1,5 @@
 import { Form, Head } from '@inertiajs/react';
+import { useTranslation } from '@sematico/laravel-inertia-i18n-react';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
 import { Button } from '@/components/ui/button';
@@ -7,19 +8,21 @@ import { Spinner } from '@/components/ui/spinner';
 import { store } from '@/routes/password/confirm';
 
 export default function ConfirmPassword() {
+    const { t } = useTranslation();
+
     return (
         <>
-            <Head title="Confirm password" />
+            <Head title={t('Confirm password')} />
 
             <Form {...store.form()} resetOnSuccess={['password']}>
                 {({ processing, errors }) => (
                     <div className="space-y-6">
                         <div className="grid gap-2">
-                            <Label htmlFor="password">Password</Label>
+                            <Label htmlFor="password">{t('Password')}</Label>
                             <PasswordInput
                                 id="password"
                                 name="password"
-                                placeholder="Password"
+                                placeholder={t('Password')}
                                 autoComplete="current-password"
                                 autoFocus
                             />
@@ -34,7 +37,7 @@ export default function ConfirmPassword() {
                                 data-test="confirm-password-button"
                             >
                                 {processing && <Spinner />}
-                                Confirm password
+                                {t('Confirm password')}
                             </Button>
                         </div>
                     </div>

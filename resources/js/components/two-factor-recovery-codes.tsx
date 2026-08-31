@@ -1,4 +1,5 @@
 import { Form } from '@inertiajs/react';
+import { useTranslation } from '@sematico/laravel-inertia-i18n-react';
 import { Eye, EyeOff, LockKeyhole, RefreshCw } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import AlertError from '@/components/alert-error';
@@ -23,6 +24,7 @@ export default function TwoFactorRecoveryCodes({
     fetchRecoveryCodes,
     errors,
 }: Props) {
+    const { t } = useTranslation();
     const [codesAreVisible, setCodesAreVisible] = useState<boolean>(false);
     const codesSectionRef = useRef<HTMLDivElement | null>(null);
     const canRegenerateCodes = recoveryCodesList.length > 0 && codesAreVisible;
@@ -76,7 +78,7 @@ export default function TwoFactorRecoveryCodes({
                             className="size-4"
                             aria-hidden="true"
                         />
-                        {codesAreVisible ? 'Hide' : 'View'} recovery codes
+                        {codesAreVisible ? t('Hide') : t('View')} recovery codes
                     </Button>
 
                     {canRegenerateCodes && (
