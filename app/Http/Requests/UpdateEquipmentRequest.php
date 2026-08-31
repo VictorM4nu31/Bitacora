@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\EquipmentType;
+use App\Models\Equipment;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -14,9 +15,11 @@ class UpdateEquipmentRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        $equipment = $this->route('equipment');
+        $routeEquipment = $this->route('equipment');
+        $id = $routeEquipment instanceof Equipment ? $routeEquipment->getKey() : $routeEquipment;
+        $equipment = Equipment::query()->whereKey($id)->first();
 
-        return $this->user()?->company_id === $equipment->company_id;
+        return $equipment !== null && $this->user()?->company_id === $equipment->company_id;
     }
 
     /**

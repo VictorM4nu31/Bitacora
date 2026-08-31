@@ -12,7 +12,6 @@ use App\Services\Providers\TranscriptionProvider;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
-use Throwable;
 
 test('the transcription provider resolves to the fake driver from config', function () {
     config()->set('ai.transcription.driver', 'fake');

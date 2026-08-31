@@ -10,7 +10,6 @@ use App\Models\User;
 use App\Services\Providers\ExtractionProvider;
 use App\Services\Providers\FakeExtractionProvider;
 use App\Support\Dto\ExtractedReport;
-use Throwable;
 
 test('the extraction provider resolves to the fake driver from config', function () {
     config()->set('ai.extraction.driver', 'fake');

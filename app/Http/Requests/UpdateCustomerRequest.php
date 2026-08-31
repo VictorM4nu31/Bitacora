@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Customer;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -13,9 +14,11 @@ class UpdateCustomerRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        $customer = $this->route('customer');
+        $routeCustomer = $this->route('customer');
+        $id = $routeCustomer instanceof Customer ? $routeCustomer->getKey() : $routeCustomer;
+        $customer = Customer::query()->whereKey($id)->first();
 
-        return $this->user()?->company_id === $customer->company_id;
+        return $customer !== null && $this->user()?->company_id === $customer->company_id;
     }
 
     /**

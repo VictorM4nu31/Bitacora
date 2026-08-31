@@ -24,13 +24,13 @@ class MaintenanceDue extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        $equipment = $this->schedule->equipment;
+        $equipmentName = $this->schedule->equipment->name ?? 'Equipo';
 
         return (new MailMessage)
-            ->subject('Mantenimiento programado: '.($equipment?->name ?? 'equipo'))
+            ->subject('Mantenimiento programado: '.$equipmentName)
             ->line('Se acerca un mantenimiento programado para el siguiente equipo:')
-            ->line($equipment?->name ?? 'Equipo')
-            ->line('Fecha programada: '.$this->schedule->next_due_at?->toDateTimeString())
+            ->line($equipmentName)
+            ->line('Fecha programada: '.$this->schedule->next_due_at->toDateTimeString())
             ->action('Ver equipo', url('/equipment/'.$this->schedule->equipment_id))
             ->line('Bitácora Inteligente para Técnicos');
     }
@@ -43,8 +43,8 @@ class MaintenanceDue extends Notification implements ShouldQueue
         return [
             'maintenance_schedule_id' => $this->schedule->id,
             'equipment_id' => $this->schedule->equipment_id,
-            'equipment_name' => $this->schedule->equipment?->name,
-            'next_due_at' => $this->schedule->next_due_at?->toDateTimeString(),
+            'equipment_name' => $this->schedule->equipment->name,
+            'next_due_at' => $this->schedule->next_due_at->toDateTimeString(),
         ];
     }
 }
