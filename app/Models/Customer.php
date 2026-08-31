@@ -34,4 +34,14 @@ class Customer extends Model
     {
         return $this->hasMany(CustomerContact::class);
     }
+
+    /**
+     * Equipment registered for the customer.
+     *
+     * @return HasMany<Equipment, $this>
+     */
+    public function equipment(): HasMany
+    {
+        return $this->hasMany(Equipment::class);
+    }
 }
