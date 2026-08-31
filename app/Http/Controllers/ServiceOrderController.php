@@ -8,7 +8,9 @@ use App\Http\Requests\StoreServiceOrderRequest;
 use App\Http\Requests\UpdateServiceOrderRequest;
 use App\Models\Customer;
 use App\Models\Equipment;
+use App\Models\ReportEvent;
 use App\Models\ServiceOrder;
+use App\Models\ServiceReport;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -116,6 +118,7 @@ class ServiceOrderController extends Controller
                 'pdfUrl' => $report ? route('service-reports.pdf', $report) : null,
                 'shareUrl' => $report ? route('service-reports.share', $report) : null,
             ],
+            'audit' => $this->auditPayload($report),
             ...$this->formOptions(request()),
         ]);
     }
@@ -163,6 +166,41 @@ class ServiceOrderController extends Controller
                 ->with('customer:id,name')
                 ->orderBy('name')
                 ->get(['id', 'name', 'customer_id']),
+        ];
+    }
+
+    /**
+     * Audit trail and AI processing timing for the report.
+     */
+    private function auditPayload(?ServiceReport $report): ?array
+    {
+        if ($report === null) {
+            return null;
+        }
+
+        $events = ReportEvent::query()
+            ->where('service_report_id', $report->id)
+            ->with('user:id,name')
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(fn (ReportEvent $event) => [
+                'id' => $event->id,
+                'action' => $event->action,
+                'user_name' => $event->user?->name,
+                'new_status' => $event->new_status,
+                'created_at' => $event->created_at->format('d/m/Y H:i'),
+            ]);
+
+        $ai = $report->audioRecord;
+
+        return [
+            'events' => $events,
+            'ai' => $ai ? [
+                'transcription_ms' => $ai->transcription_ms,
+                'analysis_ms' => $ai->analysis_ms,
+                'transcription_provider' => $ai->transcription_provider,
+                'analysis_provider' => $ai->analysis_provider,
+            ] : null,
         ];
     }
 
