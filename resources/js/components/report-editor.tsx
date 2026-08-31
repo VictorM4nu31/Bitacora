@@ -1,4 +1,5 @@
 import { router, useForm } from '@inertiajs/react';
+import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,9 +30,18 @@ type Props = {
     types: { value: string; label: string }[];
     updateUrl: string | null;
     finalizeUrl: string | null;
+    pdfUrl: string | null;
+    shareUrl: string | null;
 };
 
-export default function ReportEditor({ report, types, updateUrl, finalizeUrl }: Props) {
+export default function ReportEditor({
+    report,
+    types,
+    updateUrl,
+    finalizeUrl,
+    pdfUrl,
+    shareUrl,
+}: Props) {
     const form = useForm({
         arrival_time: report?.arrival_time ?? '',
         equipment_type: report?.equipment_type ?? '',
@@ -51,11 +61,36 @@ export default function ReportEditor({ report, types, updateUrl, finalizeUrl }: 
         );
     }
 
+    async function share() {
+        if (!shareUrl) return;
+        try {
+            const res = await fetch(shareUrl, { headers: { Accept: 'application/json' } });
+            if (!res.ok) throw new Error('share failed');
+            const data = (await res.json()) as { url: string };
+            await navigator.clipboard.writeText(data.url);
+            toast.success('Enlace copiado');
+        } catch {
+            toast.error('No se pudo compartir el reporte');
+        }
+    }
+
     if (report.status === 'finalized') {
         return (
-            <div className="space-y-1 text-sm">
-                <div className="flex items-center gap-2">
+            <div className="space-y-3 text-sm">
+                <div className="flex items-center justify-between gap-2">
                     <Badge>Finalizado</Badge>
+                    <div className="flex gap-2">
+                        {pdfUrl && (
+                            <Button asChild variant="outline" size="sm" type="button">
+                                <a href={pdfUrl}>Descargar PDF</a>
+                            </Button>
+                        )}
+                        {shareUrl && (
+                            <Button size="sm" type="button" onClick={share}>
+                                Compartir con cliente
+                            </Button>
+                        )}
+                    </div>
                 </div>
                 {report.arrival_time && (
                     <p>

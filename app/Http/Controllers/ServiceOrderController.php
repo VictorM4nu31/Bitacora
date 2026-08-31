@@ -113,6 +113,8 @@ class ServiceOrderController extends Controller
                     ->all(),
                 'updateUrl' => $report ? route('service-reports.update', $report) : null,
                 'finalizeUrl' => $report ? route('service-reports.finalize', $report) : null,
+                'pdfUrl' => $report ? route('service-reports.pdf', $report) : null,
+                'shareUrl' => $report ? route('service-reports.share', $report) : null,
             ],
             ...$this->formOptions(request()),
         ]);

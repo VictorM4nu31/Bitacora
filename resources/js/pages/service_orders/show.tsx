@@ -75,6 +75,8 @@ type PageProps = {
         types: { value: string; label: string }[];
         updateUrl: string | null;
         finalizeUrl: string | null;
+        pdfUrl: string | null;
+        shareUrl: string | null;
     };
 };
 
@@ -311,6 +313,8 @@ export default function ServiceOrderShow() {
                             types={reportOptions.types}
                             updateUrl={reportOptions.updateUrl}
                             finalizeUrl={reportOptions.finalizeUrl}
+                            pdfUrl={reportOptions.pdfUrl}
+                            shareUrl={reportOptions.shareUrl}
                         />
                     </CardContent>
                 </Card>
