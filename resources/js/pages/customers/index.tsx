@@ -1,4 +1,5 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { useTranslation } from '@sematico/laravel-inertia-i18n-react';
 import { useState, type FormEvent } from 'react';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
@@ -28,6 +29,7 @@ type PageProps = {
 };
 
 export default function Customers() {
+    const { t } = useTranslation();
     const { customers } = usePage<PageProps>().props;
     const [open, setOpen] = useState(false);
 
@@ -53,27 +55,27 @@ export default function Customers() {
 
     return (
         <>
-            <Head title="Clientes" />
+            <Head title={t('Customers')} />
 
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div className="flex items-center justify-between">
                     <Heading
-                        title="Clientes"
-                        description="Los clientes de tu empresa y sus equipos"
+                        title={t('Customers')}
+                        description={t('Your company customers and their equipment')}
                     />
 
                     <Dialog open={open} onOpenChange={setOpen}>
                         <DialogTrigger asChild>
-                            <Button>Nuevo cliente</Button>
+                            <Button>{t('New customer')}</Button>
                         </DialogTrigger>
                         <DialogContent>
                             <DialogHeader>
-                                <DialogTitle>Nuevo cliente</DialogTitle>
+                                <DialogTitle>{t('New customer')}</DialogTitle>
                             </DialogHeader>
 
                             <form onSubmit={submit} className="space-y-4">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="name">Nombre *</Label>
+                                    <Label htmlFor="name">{t('Name')} *</Label>
                                     <Input
                                         id="name"
                                         value={form.data.name}
@@ -85,7 +87,7 @@ export default function Customers() {
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="phone">Teléfono</Label>
+                                    <Label htmlFor="phone">{t('Phone')}</Label>
                                     <Input
                                         id="phone"
                                         value={form.data.phone}
@@ -96,7 +98,7 @@ export default function Customers() {
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="email">Correo</Label>
+                                    <Label htmlFor="email">{t('Email')}</Label>
                                     <Input
                                         id="email"
                                         type="email"
@@ -108,7 +110,7 @@ export default function Customers() {
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="address">Dirección</Label>
+                                    <Label htmlFor="address">{t('Address')}</Label>
                                     <Input
                                         id="address"
                                         value={form.data.address}
@@ -118,7 +120,7 @@ export default function Customers() {
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="notes">Notas</Label>
+                                    <Label htmlFor="notes">{t('Notes')}</Label>
                                     <textarea
                                         id="notes"
                                         value={form.data.notes}
@@ -134,10 +136,10 @@ export default function Customers() {
                                         variant="outline"
                                         onClick={() => setOpen(false)}
                                     >
-                                        Cancelar
+                                        {t('Cancel')}
                                     </Button>
                                     <Button type="submit" disabled={form.processing}>
-                                        Guardar
+                                        {t('Save')}
                                     </Button>
                                 </div>
                             </form>
@@ -148,7 +150,7 @@ export default function Customers() {
                 <div className="rounded-xl border">
                     {customers.data.length === 0 ? (
                         <div className="text-muted-foreground p-8 text-center text-sm">
-                            No hay clientes todavía. Crea el primero.
+                            {t('No customers yet. Create the first one.')}
                         </div>
                     ) : (
                         customers.data.map((customer) => (
@@ -160,7 +162,7 @@ export default function Customers() {
                                 <div className="min-w-0">
                                     <p className="truncate font-medium">{customer.name}</p>
                                     <p className="text-muted-foreground text-sm">
-                                        {customer.phone ?? customer.email ?? 'Sin contacto'}
+                                        {customer.phone ?? customer.email ?? t('No contact')}
                                     </p>
                                 </div>
                             </Link>

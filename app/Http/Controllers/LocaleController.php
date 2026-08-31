@@ -1,0 +1,24 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+
+class LocaleController extends Controller
+{
+    /**
+     * Update the authenticated user's locale.
+     */
+    public function update(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'locale' => ['required', 'string', Rule::in(['es', 'en'])],
+        ]);
+
+        $request->user()->update(['locale' => $data['locale']]);
+
+        return back();
+    }
+}
