@@ -1,4 +1,5 @@
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { useTranslation } from '@sematico/laravel-inertia-i18n-react';
 import { useState, type FormEvent } from 'react';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
@@ -105,6 +106,7 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 export default function ServiceOrderShow() {
+    const { t } = useTranslation();
     const {
         order,
         statuses,
@@ -148,43 +150,43 @@ export default function ServiceOrderShow() {
 
     return (
         <>
-            <Head title={`Servicio - ${order.customer?.name ?? 'Sin cliente'}`} />
+            <Head title={`${t('Service')} - ${order.customer?.name ?? t('No customer')}`} />
 
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <Link href={index.url()} className="text-muted-foreground text-sm">
-                    ← Volver a servicios
+                    ← {t('Back to services')}
                 </Link>
 
                 <div className="flex items-center justify-between">
                     <Heading
-                        title={order.customer?.name ?? 'Sin cliente'}
-                        description="Orden de servicio"
+                        title={order.customer?.name ?? t('No customer')}
+                        description={t('Service order')}
                     />
 
                     <div className="flex gap-2">
                         {order.status === 'pending' && (
                             <Button onClick={() => changeStatus('in_progress')}>
-                                Iniciar servicio
+                                {t('Start service')}
                             </Button>
                         )}
                         {order.status === 'in_progress' && (
                             <Button onClick={() => changeStatus('completed')}>
-                                Completar servicio
+                                {t('Complete service')}
                             </Button>
                         )}
 
                         <Dialog open={editOpen} onOpenChange={setEditOpen}>
                             <DialogTrigger asChild>
-                                <Button variant="outline">Editar</Button>
+                                <Button variant="outline">{t('Edit')}</Button>
                             </DialogTrigger>
                             <DialogContent>
                                 <DialogHeader>
-                                    <DialogTitle>Editar servicio</DialogTitle>
+                                    <DialogTitle>{t('Edit service')}</DialogTitle>
                                 </DialogHeader>
 
                                 <form onSubmit={submitEdit} className="space-y-4">
                                     <div className="grid gap-2">
-                                        <Label htmlFor="customer">Cliente *</Label>
+                                        <Label htmlFor="customer">{t('Customer')} *</Label>
                                         <Select
                                             value={String(form.data.customer_id)}
                                             onValueChange={(v) => {
@@ -193,7 +195,7 @@ export default function ServiceOrderShow() {
                                             }}
                                         >
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Selecciona un cliente" />
+                                                <SelectValue placeholder={t('Select a customer')} />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {customers.map((customer) => (
@@ -209,13 +211,13 @@ export default function ServiceOrderShow() {
                                     </div>
 
                                     <div className="grid gap-2">
-                                        <Label htmlFor="equipment">Equipo</Label>
+                                        <Label htmlFor="equipment">{t('Equipment')}</Label>
                                         <Select
                                             value={String(form.data.equipment_id)}
                                             onValueChange={(v) => form.setData('equipment_id', v)}
                                         >
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Selecciona un equipo (opcional)" />
+                                                <SelectValue placeholder={t('Select equipment (optional)')} />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {equipment.map((item) => (
@@ -228,7 +230,7 @@ export default function ServiceOrderShow() {
                                     </div>
 
                                     <div className="grid gap-2">
-                                        <Label htmlFor="scheduled_at">Fecha programada</Label>
+                                        <Label htmlFor="scheduled_at">{t('Scheduled date')}</Label>
                                         <Input
                                             id="scheduled_at"
                                             type="datetime-local"
@@ -245,10 +247,10 @@ export default function ServiceOrderShow() {
                                             variant="outline"
                                             onClick={() => setEditOpen(false)}
                                         >
-                                            Cancelar
+                                            {t('Cancel')}
                                         </Button>
                                         <Button type="submit" disabled={form.processing}>
-                                            Guardar
+                                            {t('Save')}
                                         </Button>
                                     </div>
                                 </form>
@@ -257,25 +259,24 @@ export default function ServiceOrderShow() {
 
                         <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
                             <DialogTrigger asChild>
-                                <Button variant="destructive">Eliminar</Button>
+                                <Button variant="destructive">{t('Delete')}</Button>
                             </DialogTrigger>
                             <DialogContent>
                                 <DialogHeader>
-                                    <DialogTitle>Eliminar servicio</DialogTitle>
+                                    <DialogTitle>{t('Delete service')}</DialogTitle>
                                 </DialogHeader>
                                 <p className="text-muted-foreground text-sm">
-                                    Se eliminará esta orden de servicio. Esta acción no se puede
-                                    deshacer.
+                                    {t('This will permanently delete this service order.')}
                                 </p>
                                 <div className="flex justify-end gap-2">
                                     <Button
                                         variant="outline"
                                         onClick={() => setDeleteOpen(false)}
                                     >
-                                        Cancelar
+                                        {t('Cancel')}
                                     </Button>
                                     <Button variant="destructive" onClick={confirmDelete}>
-                                        Eliminar
+                                        {t('Delete')}
                                     </Button>
                                 </div>
                             </DialogContent>
@@ -291,31 +292,31 @@ export default function ServiceOrderShow() {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Información</CardTitle>
+                        <CardTitle>{t('Information')}</CardTitle>
                     </CardHeader>
                     <CardContent className="grid gap-1 text-sm">
                         <p>
-                            <span className="text-muted-foreground">Cliente:</span>{' '}
+                            <span className="text-muted-foreground">{t('Customer')}:</span>{' '}
                             {order.customer?.name ?? '—'}
                         </p>
                         <p>
-                            <span className="text-muted-foreground">Equipo:</span>{' '}
+                            <span className="text-muted-foreground">{t('Equipment')}:</span>{' '}
                             {order.equipment?.name ?? '—'}
                         </p>
                         <p>
-                            <span className="text-muted-foreground">Técnico:</span>{' '}
+                            <span className="text-muted-foreground">{t('Technician')}:</span>{' '}
                             {order.technician?.name ?? '—'}
                         </p>
                         <p>
-                            <span className="text-muted-foreground">Programado:</span>{' '}
+                            <span className="text-muted-foreground">{t('Scheduled')}:</span>{' '}
                             {order.scheduled_at ? new Date(order.scheduled_at).toLocaleString() : '—'}
                         </p>
                         <p>
-                            <span className="text-muted-foreground">Iniciado:</span>{' '}
+                            <span className="text-muted-foreground">{t('Started')}:</span>{' '}
                             {order.started_at ? new Date(order.started_at).toLocaleString() : '—'}
                         </p>
                         <p>
-                            <span className="text-muted-foreground">Completado:</span>{' '}
+                            <span className="text-muted-foreground">{t('Completed')}:</span>{' '}
                             {order.completed_at ? new Date(order.completed_at).toLocaleString() : '—'}
                         </p>
                     </CardContent>
@@ -323,7 +324,7 @@ export default function ServiceOrderShow() {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Reporte del servicio</CardTitle>
+                        <CardTitle>{t('Service report')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <ReportEditor
@@ -339,7 +340,7 @@ export default function ServiceOrderShow() {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Nota de voz</CardTitle>
+                        <CardTitle>{t('Voice note')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <VoiceRecorder audioUrl={audioUrl} initial={audioRecords} />
@@ -348,7 +349,7 @@ export default function ServiceOrderShow() {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Fotos</CardTitle>
+                        <CardTitle>{t('Photos')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <PhotoGallery photoUploadUrl={photoUploadUrl} initial={photos} />
@@ -358,24 +359,24 @@ export default function ServiceOrderShow() {
                 {audit && (
                     <Card>
                         <CardHeader>
-                            <CardTitle>Auditoría</CardTitle>
+                            <CardTitle>{t('Audit')}</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-3 text-sm">
                             {audit.ai && (
                                 <div className="grid gap-1 text-xs">
                                     <p className="text-muted-foreground">
-                                        Transcripción: {audit.ai.transcription_provider ?? '—'} ·{' '}
+                                        {t('Transcription')}: {audit.ai.transcription_provider ?? '—'} ·{' '}
                                         {audit.ai.transcription_ms ?? 0} ms
                                     </p>
                                     <p className="text-muted-foreground">
-                                        Análisis: {audit.ai.analysis_provider ?? '—'} ·{' '}
+                                        {t('Analysis')}: {audit.ai.analysis_provider ?? '—'} ·{' '}
                                         {audit.ai.analysis_ms ?? 0} ms
                                     </p>
                                 </div>
                             )}
                             {audit.events.length === 0 ? (
                                 <p className="text-muted-foreground text-sm">
-                                    Sin eventos registrados.
+                                    {t('No events recorded.')}
                                 </p>
                             ) : (
                                 <ul className="space-y-2">
@@ -388,7 +389,7 @@ export default function ServiceOrderShow() {
                                                 {event.action} — {event.created_at}
                                             </span>
                                             <span className="text-muted-foreground text-xs">
-                                                {event.user_name ?? 'Sistema (IA)'}
+                                                {event.user_name ?? t('System (AI)')}
                                             </span>
                                         </li>
                                     ))}
@@ -404,6 +405,6 @@ export default function ServiceOrderShow() {
 
 ServiceOrderShow.layout = {
     breadcrumbs: [
-        { title: 'Servicios', href: index.url() },
+        { title: 'Services', href: index.url() },
     ],
 };

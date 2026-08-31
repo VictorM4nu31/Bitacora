@@ -3,16 +3,20 @@
 use App\Http\Controllers\AudioRecordController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\EquipmentController;
+use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\MaintenanceScheduleController;
 use App\Http\Controllers\ServiceOrderController;
 use App\Http\Controllers\ServicePhotoController;
 use App\Http\Controllers\ServiceReportController;
+use App\Http\Middleware\SetLocale;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', SetLocale::class])->group(function () {
     Route::inertia('dashboard', 'dashboard')->name('dashboard');
+
+    Route::patch('locale', [LocaleController::class, 'update'])->name('locale.update');
 
     Route::resource('customers', CustomerController::class)->except(['create', 'edit']);
     Route::resource('equipment', EquipmentController::class)->except(['create', 'edit']);

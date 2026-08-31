@@ -1,4 +1,5 @@
 import { router, useForm } from '@inertiajs/react';
+import { useTranslation } from '@sematico/laravel-inertia-i18n-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -42,6 +43,7 @@ export default function ReportEditor({
     pdfUrl,
     shareUrl,
 }: Props) {
+    const { t } = useTranslation();
     const form = useForm({
         arrival_time: report?.arrival_time ?? '',
         equipment_type: report?.equipment_type ?? '',
@@ -56,7 +58,7 @@ export default function ReportEditor({
     if (!report) {
         return (
             <p className="text-muted-foreground text-sm">
-                El reporte se generará automáticamente cuando se procese la nota de voz.
+                {t('The report will be generated automatically when the voice note is processed.')}
             </p>
         );
     }
@@ -68,9 +70,9 @@ export default function ReportEditor({
             if (!res.ok) throw new Error('share failed');
             const data = (await res.json()) as { url: string };
             await navigator.clipboard.writeText(data.url);
-            toast.success('Enlace copiado');
+            toast.success(t('Link copied'));
         } catch {
-            toast.error('No se pudo compartir el reporte');
+            toast.error(t('Could not share the report'));
         }
     }
 
@@ -78,48 +80,48 @@ export default function ReportEditor({
         return (
             <div className="space-y-3 text-sm">
                 <div className="flex items-center justify-between gap-2">
-                    <Badge>Finalizado</Badge>
+                    <Badge>{t('Finalized')}</Badge>
                     <div className="flex gap-2">
                         {pdfUrl && (
                             <Button asChild variant="outline" size="sm" type="button">
-                                <a href={pdfUrl}>Descargar PDF</a>
+                                <a href={pdfUrl}>{t('Download PDF')}</a>
                             </Button>
                         )}
                         {shareUrl && (
                             <Button size="sm" type="button" onClick={share}>
-                                Compartir con cliente
+                                {t('Share with customer')}
                             </Button>
                         )}
                     </div>
                 </div>
                 {report.arrival_time && (
                     <p>
-                        <span className="text-muted-foreground">Llegada:</span> {report.arrival_time}
+                        <span className="text-muted-foreground">{t('Arrival')}:</span> {report.arrival_time}
                     </p>
                 )}
                 {report.problem && (
                     <p>
-                        <span className="text-muted-foreground">Problema:</span> {report.problem}
+                        <span className="text-muted-foreground">{t('Problem')}:</span> {report.problem}
                     </p>
                 )}
                 {report.diagnosis && (
                     <p>
-                        <span className="text-muted-foreground">Diagnóstico:</span> {report.diagnosis}
+                        <span className="text-muted-foreground">{t('Diagnosis')}:</span> {report.diagnosis}
                     </p>
                 )}
                 {report.work_done && (
                     <p>
-                        <span className="text-muted-foreground">Trabajo:</span> {report.work_done}
+                        <span className="text-muted-foreground">{t('Work done')}:</span> {report.work_done}
                     </p>
                 )}
                 {report.result && (
                     <p>
-                        <span className="text-muted-foreground">Resultado:</span> {report.result}
+                        <span className="text-muted-foreground">{t('Result')}:</span> {report.result}
                     </p>
                 )}
                 {report.total_cost !== null && (
                     <p>
-                        <span className="text-muted-foreground">Costo:</span> ${report.total_cost}
+                        <span className="text-muted-foreground">{t('Cost')}:</span> ${report.total_cost}
                     </p>
                 )}
             </div>
@@ -140,7 +142,7 @@ export default function ReportEditor({
         <div className="space-y-4">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="grid gap-2">
-                    <Label htmlFor="arrival_time">Hora de llegada</Label>
+                    <Label htmlFor="arrival_time">{t('Arrival time')}</Label>
                     <Input
                         id="arrival_time"
                         value={form.data.arrival_time}
@@ -149,13 +151,13 @@ export default function ReportEditor({
                     />
                 </div>
                 <div className="grid gap-2">
-                    <Label htmlFor="equipment_type">Tipo de equipo</Label>
+                    <Label htmlFor="equipment_type">{t('Equipment type')}</Label>
                     <Select
                         value={String(form.data.equipment_type)}
                         onValueChange={(v) => form.setData('equipment_type', v)}
                     >
                         <SelectTrigger>
-                            <SelectValue placeholder="Selecciona un tipo" />
+                            <SelectValue placeholder="{t('Select a type')}" />
                         </SelectTrigger>
                         <SelectContent>
                             {types.map((type) => (
@@ -169,7 +171,7 @@ export default function ReportEditor({
             </div>
 
             <div className="grid gap-2">
-                <Label htmlFor="problem">Problema</Label>
+                <Label htmlFor="problem">{t('Problem')}</Label>
                 <Input
                     id="problem"
                     value={form.data.problem}
@@ -178,7 +180,7 @@ export default function ReportEditor({
             </div>
 
             <div className="grid gap-2">
-                <Label htmlFor="diagnosis">Diagnóstico</Label>
+                <Label htmlFor="diagnosis">{t('Diagnosis')}</Label>
                 <Input
                     id="diagnosis"
                     value={form.data.diagnosis}
@@ -187,7 +189,7 @@ export default function ReportEditor({
             </div>
 
             <div className="grid gap-2">
-                <Label htmlFor="work_done">Trabajo realizado</Label>
+                <Label htmlFor="work_done">{t('Work done')}</Label>
                 <textarea
                     id="work_done"
                     value={form.data.work_done}
@@ -197,7 +199,7 @@ export default function ReportEditor({
             </div>
 
             <div className="grid gap-2">
-                <Label htmlFor="tests_performed">Pruebas realizadas</Label>
+                <Label htmlFor="tests_performed">{t('Tests performed')}</Label>
                 <Input
                     id="tests_performed"
                     value={form.data.tests_performed}
@@ -206,7 +208,7 @@ export default function ReportEditor({
             </div>
 
             <div className="grid gap-2">
-                <Label htmlFor="result">Resultado</Label>
+                <Label htmlFor="result">{t('Result')}</Label>
                 <Input
                     id="result"
                     value={form.data.result}
@@ -215,7 +217,7 @@ export default function ReportEditor({
             </div>
 
             <div className="grid gap-2">
-                <Label htmlFor="total_cost">Costo total (MXN)</Label>
+                <Label htmlFor="total_cost">{t('Total cost (MXN)')}</Label>
                 <Input
                     id="total_cost"
                     type="number"

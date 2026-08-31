@@ -31,3 +31,19 @@ test('inertia shared props include the current locale', function () {
 
     $this->assertTrue(app()->getLocale() === 'es');
 });
+
+test('the locale endpoint updates the authenticated user locale', function () {
+    $user = User::factory()->create(['locale' => 'es']);
+
+    $this->actingAs($user)->patch(route('locale.update'), ['locale' => 'en'])->assertRedirect();
+
+    expect($user->fresh()->locale)->toBe('en');
+});
+
+test('the locale endpoint rejects unsupported locales', function () {
+    $user = User::factory()->create(['locale' => 'es']);
+
+    $this->actingAs($user)->patch(route('locale.update'), ['locale' => 'fr'])->assertSessionHasErrors('locale');
+
+    expect($user->fresh()->locale)->toBe('es');
+});

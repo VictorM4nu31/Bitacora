@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from '@sematico/laravel-inertia-i18n-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
@@ -30,9 +31,9 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 const STATUS_LABELS: Record<string, string> = {
-    uploaded: 'Subido',
-    processing: 'Procesando',
-    transcribed: 'Transcrito',
+    uploaded: 'Uploaded',
+    processing: 'Processing',
+    transcribed: 'Transcribed',
     failed: 'Error',
 };
 
@@ -41,6 +42,7 @@ export default function VoiceRecorder({ audioUrl, initial }: Props) {
     const [error, setError] = useState<string | null>(null);
     const [elapsed, setElapsed] = useState(0);
     const [items, setItems] = useState<AudioItem[]>(initial);
+    const { t } = useTranslation();
 
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const chunksRef = useRef<Blob[]>([]);
@@ -77,7 +79,7 @@ export default function VoiceRecorder({ audioUrl, initial }: Props) {
 
                     if (blob.size === 0) {
                         setPhase('idle');
-                        setError('La grabación quedó vacía. Inténtalo de nuevo.');
+                        setError(t('The recording was empty. Please try again.'));
                         return;
                     }
 
@@ -91,7 +93,7 @@ export default function VoiceRecorder({ audioUrl, initial }: Props) {
             })
             .catch(() => {
                 setPhase('idle');
-                setError('No se pudo acceder al micrófono. Revisa los permisos.');
+                setError(t('Could not access the microphone. Check your permissions.'));
             });
     }
 
@@ -152,7 +154,7 @@ export default function VoiceRecorder({ audioUrl, initial }: Props) {
             });
 
             if (!response.ok) {
-                throw new Error('No se pudo subir la nota de voz.');
+                throw new Error('Could not upload the voice note.');
             }
 
             const data = (await response.json()) as {
@@ -167,7 +169,7 @@ export default function VoiceRecorder({ audioUrl, initial }: Props) {
             setPhase('done');
         } catch {
             setPhase('error');
-            setError('No se pudo subir la nota de voz. Revisa tu conexión.');
+            setError(t('Could not upload the voice note. Check your connection.'));
         }
     }
 
@@ -179,23 +181,23 @@ export default function VoiceRecorder({ audioUrl, initial }: Props) {
             <div className="flex items-center gap-3">
                 {phase === 'recording' ? (
                     <Button variant="destructive" onClick={stopRecording}>
-                        ⏺ Detener ({minutes}:{seconds})
+                        ⏺ {t('Stop')} ({minutes}:{seconds})
                     </Button>
                 ) : (
                     <Button
                         onClick={startRecording}
                         disabled={phase === 'uploading'}
                     >
-                        🎙️ Grabar nota de voz
+                        🎙️ {t('Record voice note')}
                     </Button>
                 )}
 
                 {phase === 'uploading' && (
-                    <span className="text-muted-foreground text-sm">Subiendo…</span>
+                    <span className="text-muted-foreground text-sm">{t('Uploading…')}</span>
                 )}
                 {phase === 'done' && (
                     <span className="text-sm text-green-600 dark:text-green-400">
-                        Nota guardada
+                        {t('Voice note saved')}
                     </span>
                 )}
             </div>
@@ -211,13 +213,13 @@ export default function VoiceRecorder({ audioUrl, initial }: Props) {
                         >
                             <div className="flex items-center justify-between">
                                 <span className="text-muted-foreground">
-                                    Nota de voz
+                                    {t('Voice note')}
                                     {item.duration_ms
                                         ? ` (${Math.round(item.duration_ms / 1000)}s)`
                                         : ''}
                                 </span>
                                 <Badge variant="secondary" className={STATUS_STYLES[item.status]}>
-                                    {STATUS_LABELS[item.status] ?? item.status}
+                                    {t(STATUS_LABELS[item.status] ?? item.status)}
                                 </Badge>
                             </div>
                             {item.status === 'transcribed' && item.transcript && (
