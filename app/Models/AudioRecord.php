@@ -20,7 +20,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int|null $duration_ms
  * @property AudioRecordStatus $status
  */
-#[Fillable(['service_order_id', 'recorder_id', 'disk', 'path', 'mime', 'size', 'duration_ms', 'locale', 'status', 'transcript_text', 'transcription_provider', 'transcription_ms', 'transcription_error'])]
+#[Fillable(['service_order_id', 'recorder_id', 'disk', 'path', 'mime', 'size', 'duration_ms', 'locale', 'status', 'transcript_text', 'transcription_provider', 'transcription_ms', 'transcription_error', 'extracted_data', 'analysis_provider', 'analysis_ms', 'analysis_error'])]
 class AudioRecord extends Model
 {
     /** @use HasFactory<AudioRecordFactory> */
@@ -57,6 +57,7 @@ class AudioRecord extends Model
             'status' => AudioRecordStatus::class,
             'duration_ms' => 'integer',
             'size' => 'integer',
+            'extracted_data' => 'array',
         ];
     }
 }
