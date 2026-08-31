@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\AudioRecord;
 use App\Services\Providers\ExtractionProvider;
+use App\Services\ReportService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -56,6 +57,8 @@ class AnalyzeTranscriptJob implements ShouldQueue
             'analysis_provider' => config('ai.extraction.driver'),
             'analysis_ms' => (int) round((microtime(true) - $startedAt) * 1000),
         ]);
+
+        app(ReportService::class)->createDraftFromAudio($this->audio);
     }
 
     /**

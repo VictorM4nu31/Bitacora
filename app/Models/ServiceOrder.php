@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * @property int $id
@@ -63,6 +64,16 @@ class ServiceOrder extends Model
     public function audioRecords(): HasMany
     {
         return $this->hasMany(AudioRecord::class);
+    }
+
+    /**
+     * The report generated for the service order.
+     *
+     * @return HasOne<ServiceReport, $this>
+     */
+    public function report(): HasOne
+    {
+        return $this->hasOne(ServiceReport::class);
     }
 
     /**

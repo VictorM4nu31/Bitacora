@@ -2,6 +2,7 @@ import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { useState, type FormEvent } from 'react';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
+import ReportEditor from '@/components/report-editor';
 import VoiceRecorder from '@/components/voice-recorder';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -46,6 +47,19 @@ type AudioItem = {
     duration_ms: number | null;
 };
 
+type Report = {
+    id: number;
+    status: string;
+    arrival_time: string | null;
+    equipment_type: string | null;
+    problem: string | null;
+    diagnosis: string | null;
+    work_done: string | null;
+    tests_performed: string | null;
+    result: string | null;
+    total_cost: string | number | null;
+};
+
 type PageProps = {
     order: OrderDetail;
     statuses: { value: string; label: string }[];
@@ -53,6 +67,12 @@ type PageProps = {
     equipment: { id: number; name: string; customer_id: number }[];
     audioUrl: string;
     audioRecords: AudioItem[];
+    report: Report | null;
+    reportOptions: {
+        types: { value: string; label: string }[];
+        updateUrl: string | null;
+        finalizeUrl: string | null;
+    };
 };
 
 const STATUS_STYLES: Record<string, string> = {
@@ -63,7 +83,7 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 export default function ServiceOrderShow() {
-    const { order, statuses, customers, equipment, audioUrl, audioRecords } =
+    const { order, statuses, customers, equipment, audioUrl, audioRecords, report, reportOptions } =
         usePage<PageProps>().props;
     const [editOpen, setEditOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
@@ -265,6 +285,20 @@ export default function ServiceOrderShow() {
                             <span className="text-muted-foreground">Completado:</span>{' '}
                             {order.completed_at ? new Date(order.completed_at).toLocaleString() : '—'}
                         </p>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Reporte del servicio</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <ReportEditor
+                            report={report}
+                            types={reportOptions.types}
+                            updateUrl={reportOptions.updateUrl}
+                            finalizeUrl={reportOptions.finalizeUrl}
+                        />
                     </CardContent>
                 </Card>
 

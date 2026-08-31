@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\EquipmentType;
 use App\Enums\ServiceOrderStatus;
 use App\Http\Requests\StoreServiceOrderRequest;
 use App\Http\Requests\UpdateServiceOrderRequest;
@@ -72,11 +73,35 @@ class ServiceOrderController extends Controller
                 'statusUrl' => route('audio-records.status', $audio),
             ]);
 
+        $report = $serviceOrder->report;
+
         return Inertia::render('service_orders/show', [
             'order' => $serviceOrder,
             'statuses' => $this->statusOptions(),
             'audioUrl' => route('service-orders.audio', $serviceOrder),
             'audioRecords' => $audioRecords,
+            'report' => $report ? [
+                'id' => $report->id,
+                'status' => $report->status->value,
+                'arrival_time' => $report->arrival_time?->format('H:i'),
+                'equipment_type' => $report->equipment_type,
+                'problem' => $report->problem,
+                'diagnosis' => $report->diagnosis,
+                'work_done' => $report->work_done,
+                'tests_performed' => $report->tests_performed,
+                'result' => $report->result,
+                'total_cost' => $report->total_cost,
+            ] : null,
+            'reportOptions' => [
+                'types' => collect(EquipmentType::cases())
+                    ->map(fn (EquipmentType $type) => [
+                        'value' => $type->value,
+                        'label' => $type->label(),
+                    ])
+                    ->all(),
+                'updateUrl' => $report ? route('service-reports.update', $report) : null,
+                'finalizeUrl' => $report ? route('service-reports.finalize', $report) : null,
+            ],
             ...$this->formOptions(request()),
         ]);
     }
