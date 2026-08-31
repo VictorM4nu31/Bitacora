@@ -15,6 +15,9 @@
 # IA / herramientas locales de desarrollo
 .ai/
 /.playwright-mcp/
+/native
+/nativephp.lock
+/nativephp/
 .opencode/
 .opencode.json
 .agents/
