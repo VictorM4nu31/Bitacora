@@ -8,7 +8,10 @@ use App\Models\Customer;
 use App\Models\ServiceOrder;
 use App\Models\ServiceReport;
 use App\Models\User;
+use App\Services\ReportPdfService;
 use App\Services\ReportService;
+use App\Services\ReportShareService;
+use Illuminate\Support\Facades\Storage;
 
 test('an analyzed voice note creates a draft report for the service order', function () {
     $company = Company::factory()->create();
@@ -105,4 +108,67 @@ test('finalizing a report marks the service order as completed', function () {
 
     expect($order->fresh()->status->value)->toBe('completed')
         ->and($order->fresh()->completed_at)->not->toBeNull();
+});
+
+test('the pdf service stores a generated pdf on the private disk', function () {
+    Storage::fake('local');
+
+    $company = Company::factory()->create();
+    $user = User::factory()->forCompany($company)->create();
+    $order = ServiceOrder::factory()->forCompany($company)->create([
+        'technician_id' => $user->id,
+        'customer_id' => Customer::factory()->forCompany($company),
+    ]);
+    $report = ServiceReport::factory()->forServiceOrder($order)->status(ReportStatus::Finalized)->create();
+
+    $path = app(ReportPdfService::class)->generate($report);
+
+    Storage::disk('local')->assertExists($path);
+    expect($report->fresh()->pdf_path)->toBe($path);
+});
+
+test('the pdf endpoint returns a downloadable pdf', function () {
+    Storage::fake('local');
+
+    $company = Company::factory()->create();
+    $user = User::factory()->forCompany($company)->create();
+    $order = ServiceOrder::factory()->forCompany($company)->create([
+        'technician_id' => $user->id,
+        'customer_id' => Customer::factory()->forCompany($company),
+    ]);
+    $report = ServiceReport::factory()->forServiceOrder($order)->status(ReportStatus::Finalized)->create();
+
+    $this->actingAs($user)->get(route('service-reports.pdf', $report))->assertOk();
+});
+
+test('the share service returns a signed url', function () {
+    $company = Company::factory()->create();
+    $user = User::factory()->forCompany($company)->create();
+    $order = ServiceOrder::factory()->forCompany($company)->create([
+        'technician_id' => $user->id,
+        'customer_id' => Customer::factory()->forCompany($company),
+    ]);
+    $report = ServiceReport::factory()->forServiceOrder($order)->status(ReportStatus::Finalized)->create();
+
+    $url = app(ReportShareService::class)->shareUrl($report, 60);
+
+    expect($url)->toContain('/shared/'.$report->id)
+        ->and($url)->toContain('signature')
+        ->and($url)->toContain('expires');
+});
+
+test('the shared customer view requires a valid signature', function () {
+    $company = Company::factory()->create();
+    $order = ServiceOrder::factory()->forCompany($company)->create([
+        'customer_id' => Customer::factory()->forCompany($company),
+    ]);
+    $report = ServiceReport::factory()->forServiceOrder($order)->status(ReportStatus::Finalized)->create();
+    $report->load('serviceOrder');
+
+    // Without a valid signature -> 403.
+    $this->get('/shared/'.$report->id)->assertForbidden();
+
+    // With a valid signature -> 200.
+    $url = app(ReportShareService::class)->shareUrl($report, 60);
+    $this->get($url)->assertOk();
 });

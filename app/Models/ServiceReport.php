@@ -20,7 +20,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int|null $audio_record_id
  * @property ReportStatus $status
  */
-#[Fillable(['service_order_id', 'company_id', 'customer_id', 'equipment_id', 'technician_id', 'audio_record_id', 'arrival_time', 'equipment_type', 'problem', 'diagnosis', 'work_done', 'tests_performed', 'result', 'total_cost', 'currency', 'status', 'llm_raw_json', 'llm_confidence'])]
+#[Fillable(['service_order_id', 'company_id', 'customer_id', 'equipment_id', 'technician_id', 'audio_record_id', 'arrival_time', 'equipment_type', 'problem', 'diagnosis', 'work_done', 'tests_performed', 'result', 'total_cost', 'currency', 'status', 'llm_raw_json', 'llm_confidence', 'pdf_path'])]
 class ServiceReport extends Model
 {
     /** @use HasFactory<ServiceReportFactory> */

@@ -22,17 +22,26 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('audio-records/{audio_record}/status', [AudioRecordController::class, 'status'])
         ->name('audio-records.status');
 
-    Route::put('service-reports/{service_report}', [ServiceReportController::class, 'update'])
-        ->name('service-reports.update');
-    Route::post('service-reports/{service_report}/finalize', [ServiceReportController::class, 'finalize'])
-        ->name('service-reports.finalize');
-
     Route::post('service-orders/{service_order}/photos', [ServicePhotoController::class, 'store'])
         ->name('service-orders.photos');
     Route::get('service-photos/{service_photo}/file', [ServicePhotoController::class, 'file'])
         ->name('service-photos.file');
     Route::delete('service-photos/{service_photo}', [ServicePhotoController::class, 'destroy'])
         ->name('service-photos.destroy');
+
+    Route::put('service-reports/{service_report}', [ServiceReportController::class, 'update'])
+        ->name('service-reports.update');
+    Route::post('service-reports/{service_report}/finalize', [ServiceReportController::class, 'finalize'])
+        ->name('service-reports.finalize');
+    Route::get('service-reports/{service_report}/pdf', [ServiceReportController::class, 'pdf'])
+        ->name('service-reports.pdf');
+    Route::get('service-reports/{service_report}/share', [ServiceReportController::class, 'share'])
+        ->name('service-reports.share');
+});
+
+Route::middleware('signed')->group(function () {
+    Route::get('shared/{service_report}', [ServiceReportController::class, 'shared'])
+        ->name('reports.shared');
 });
 
 require __DIR__.'/settings.php';
