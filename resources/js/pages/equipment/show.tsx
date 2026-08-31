@@ -2,6 +2,7 @@ import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { useState, type FormEvent } from 'react';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -26,6 +27,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { index, update, destroy } from '@/routes/equipment';
+import { show as serviceOrderShow } from '@/routes/service-orders';
 
 type EquipmentDetail = {
     id: number;
@@ -38,14 +40,24 @@ type EquipmentDetail = {
     customer: { id: number; name: string } | null;
 };
 
+type HistoryItem = {
+    id: number;
+    status: string;
+    statusLabel: string;
+    customer_name: string | null;
+    report_status: string | null;
+    date: string;
+};
+
 type PageProps = {
     equipment: EquipmentDetail;
+    history: HistoryItem[];
     customers: { id: number; name: string }[];
     types: { value: string; label: string }[];
 };
 
 export default function EquipmentShow() {
-    const { equipment, customers, types } = usePage<PageProps>().props;
+    const { equipment, history, customers, types } = usePage<PageProps>().props;
     const [editOpen, setEditOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
 
@@ -266,6 +278,44 @@ export default function EquipmentShow() {
                                 <span className="text-muted-foreground">Notas:</span>{' '}
                                 {equipment.notes}
                             </p>
+                        )}
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Historial de servicios</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        {history.length === 0 ? (
+                            <p className="text-muted-foreground text-sm">
+                                Este equipo aún no tiene servicios registrados.
+                            </p>
+                        ) : (
+                            <ul className="space-y-2">
+                                {history.map((item) => (
+                                    <li key={item.id}>
+                                        <Link
+                                            href={serviceOrderShow.url({ service_order: item.id })}
+                                            className="hover:bg-muted flex items-center justify-between rounded-lg border px-3 py-2 text-sm transition-colors"
+                                        >
+                                            <div>
+                                                <p className="font-medium">
+                                                    {item.customer_name ?? 'Sin cliente'} — {item.date}
+                                                </p>
+                                                <p className="text-muted-foreground text-xs">
+                                                    {item.report_status === 'finalized'
+                                                        ? 'Con reporte finalizado'
+                                                        : item.report_status === 'draft'
+                                                          ? 'Reporte en borrador'
+                                                          : 'Sin reporte'}
+                                                </p>
+                                            </div>
+                                            <Badge variant="secondary">{item.statusLabel}</Badge>
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
                         )}
                     </CardContent>
                 </Card>

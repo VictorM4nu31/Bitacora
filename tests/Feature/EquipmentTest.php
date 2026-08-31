@@ -4,6 +4,7 @@ use App\Enums\EquipmentType;
 use App\Models\Company;
 use App\Models\Customer;
 use App\Models\Equipment;
+use App\Models\ServiceOrder;
 use App\Models\User;
 
 test('a technician can create equipment within their company', function () {
@@ -103,4 +104,30 @@ test('equipment can be deleted (soft) by its company member', function () {
         ->assertRedirect(route('equipment.index'));
 
     $this->assertSoftDeleted('equipment', ['id' => $equipment->id]);
+});
+
+test('the equipment show lists only its service orders within the company', function () {
+    $company = Company::factory()->create();
+    $user = User::factory()->forCompany($company)->create();
+    $customer = Customer::factory()->forCompany($company)->create();
+    $equipment = Equipment::factory()->forCompany($company)->forCustomer($customer)->create();
+
+    ServiceOrder::factory()->forCompany($company)->create([
+        'equipment_id' => $equipment->id,
+        'customer_id' => $customer->id,
+        'technician_id' => $user->id,
+    ]);
+
+    $this->actingAs($user)->get(route('equipment.show', $equipment))->assertOk();
+
+    expect(ServiceOrder::where('equipment_id', $equipment->id)->count())->toBe(1);
+});
+
+test('a technician cannot view the history of equipment from another company', function () {
+    $companyA = Company::factory()->create();
+    $companyB = Company::factory()->create();
+    $user = User::factory()->forCompany($companyA)->create();
+    $equipmentB = Equipment::factory()->forCompany($companyB)->create();
+
+    $this->actingAs($user)->get(route('equipment.show', $equipmentB))->assertForbidden();
 });
