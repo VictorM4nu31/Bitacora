@@ -61,6 +61,8 @@ class TranscribeAudioJob implements ShouldQueue
             'transcription_provider' => config('ai.transcription.driver'),
             'transcription_ms' => (int) round((microtime(true) - $startedAt) * 1000),
         ]);
+
+        AnalyzeTranscriptJob::dispatch($this->audio);
     }
 
     /**

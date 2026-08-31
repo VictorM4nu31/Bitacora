@@ -64,6 +64,7 @@ class AudioRecordController extends Controller
             'status' => $audioRecord->status->value,
             'statusLabel' => $audioRecord->status->label(),
             'transcript' => $audioRecord->transcript_text,
+            'extracted' => $audioRecord->extracted_data,
         ]);
     }
 }
