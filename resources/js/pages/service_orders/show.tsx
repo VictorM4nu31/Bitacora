@@ -2,6 +2,7 @@ import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { useState, type FormEvent } from 'react';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
+import PhotoGallery from '@/components/photo-gallery';
 import ReportEditor from '@/components/report-editor';
 import VoiceRecorder from '@/components/voice-recorder';
 import { Badge } from '@/components/ui/badge';
@@ -67,6 +68,8 @@ type PageProps = {
     equipment: { id: number; name: string; customer_id: number }[];
     audioUrl: string;
     audioRecords: AudioItem[];
+    photoUploadUrl: string;
+    photos: { id: number; original_name: string; url: string }[];
     report: Report | null;
     reportOptions: {
         types: { value: string; label: string }[];
@@ -83,8 +86,18 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 export default function ServiceOrderShow() {
-    const { order, statuses, customers, equipment, audioUrl, audioRecords, report, reportOptions } =
-        usePage<PageProps>().props;
+    const {
+        order,
+        statuses,
+        customers,
+        equipment,
+        audioUrl,
+        audioRecords,
+        photoUploadUrl,
+        photos,
+        report,
+        reportOptions,
+    } = usePage<PageProps>().props;
     const [editOpen, setEditOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
 
@@ -308,6 +321,15 @@ export default function ServiceOrderShow() {
                     </CardHeader>
                     <CardContent>
                         <VoiceRecorder audioUrl={audioUrl} initial={audioRecords} />
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Fotos</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <PhotoGallery photoUploadUrl={photoUploadUrl} initial={photos} />
                     </CardContent>
                 </Card>
             </div>
