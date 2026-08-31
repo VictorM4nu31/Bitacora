@@ -33,9 +33,9 @@ class LocalWhisperTranscriptionProvider implements TranscriptionProvider
         $process->run();
 
         if (! $process->isSuccessful()) {
-            throw new RuntimeException(
-                'Local Whisper failed: '.$process->getErrorOutput() ?: 'unknown error',
-            );
+            $error = trim((string) $process->getErrorOutput()) ?: 'unknown error';
+
+            throw new RuntimeException('Local Whisper failed: '.$error);
         }
 
         return trim($process->getOutput());

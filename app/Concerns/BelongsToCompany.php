@@ -28,7 +28,8 @@ trait BelongsToCompany
     /**
      * Scope query to a given company.
      *
-     * @param  Builder<*>  $query
+     * @param  Builder<static>  $query
+     * @return Builder<static>
      */
     public function scopeForCompany(Builder $query, Company|int $company): Builder
     {

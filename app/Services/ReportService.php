@@ -68,6 +68,8 @@ class ReportService
 
     /**
      * Update a report from technician corrections (keeps the draft status).
+     *
+     * @param  array<string, mixed>  $data
      */
     public function update(ServiceReport $report, array $data, ?User $user = null): ServiceReport
     {

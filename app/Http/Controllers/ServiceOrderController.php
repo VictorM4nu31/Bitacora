@@ -171,6 +171,8 @@ class ServiceOrderController extends Controller
 
     /**
      * Audit trail and AI processing timing for the report.
+     *
+     * @return array{events: array<int, array{id: int, action: string, user_name: string|null, new_status: string|null, created_at: string}>, ai: array{transcription_ms: int|null, analysis_ms: int|null, transcription_provider: string|null, analysis_provider: string|null}|null}|null
      */
     private function auditPayload(?ServiceReport $report): ?array
     {
@@ -189,7 +191,8 @@ class ServiceOrderController extends Controller
                 'user_name' => $event->user?->name,
                 'new_status' => $event->new_status,
                 'created_at' => $event->created_at->format('d/m/Y H:i'),
-            ]);
+            ])
+            ->all();
 
         $ai = $report->audioRecord;
 

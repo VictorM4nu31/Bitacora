@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\ServiceOrderStatus;
+use App\Models\ServiceOrder;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -14,9 +15,11 @@ class UpdateServiceOrderRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        $order = $this->route('service_order');
+        $routeOrder = $this->route('service_order');
+        $id = $routeOrder instanceof ServiceOrder ? $routeOrder->getKey() : $routeOrder;
+        $order = ServiceOrder::query()->whereKey($id)->first();
 
-        return $this->user()?->company_id === $order->company_id;
+        return $order !== null && $this->user()?->company_id === $order->company_id;
     }
 
     /**
