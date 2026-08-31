@@ -67,6 +67,16 @@ class ServiceOrder extends Model
     }
 
     /**
+     * Photos attached to the service order.
+     *
+     * @return HasMany<ServicePhoto, $this>
+     */
+    public function photos(): HasMany
+    {
+        return $this->hasMany(ServicePhoto::class);
+    }
+
+    /**
      * The report generated for the service order.
      *
      * @return HasOne<ServiceReport, $this>

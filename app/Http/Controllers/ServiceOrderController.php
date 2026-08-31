@@ -75,11 +75,23 @@ class ServiceOrderController extends Controller
 
         $report = $serviceOrder->report;
 
+        $photos = $serviceOrder->photos()
+            ->orderBy('sort_order')
+            ->get()
+            ->map(fn ($photo) => [
+                'id' => $photo->id,
+                'original_name' => $photo->original_name,
+                'url' => route('service-photos.file', $photo),
+            ])
+            ->values();
+
         return Inertia::render('service_orders/show', [
             'order' => $serviceOrder,
             'statuses' => $this->statusOptions(),
             'audioUrl' => route('service-orders.audio', $serviceOrder),
             'audioRecords' => $audioRecords,
+            'photoUploadUrl' => route('service-orders.photos', $serviceOrder),
+            'photos' => $photos,
             'report' => $report ? [
                 'id' => $report->id,
                 'status' => $report->status->value,
