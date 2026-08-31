@@ -2,8 +2,11 @@
 
 namespace App\Providers;
 
+use App\Services\Providers\ExtractionProvider;
+use App\Services\Providers\FakeExtractionProvider;
 use App\Services\Providers\FakeTranscriptionProvider;
 use App\Services\Providers\LocalWhisperTranscriptionProvider;
+use App\Services\Providers\OpenAiCompatibleExtractionProvider;
 use App\Services\Providers\TranscriptionProvider;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
@@ -19,6 +22,20 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->bindTranscriptionProvider();
+        $this->bindExtractionProvider();
+    }
+
+    /**
+     * Resolve the extraction provider from the configured driver.
+     */
+    protected function bindExtractionProvider(): void
+    {
+        $this->app->bind(ExtractionProvider::class, function ($app) {
+            return match (config('ai.extraction.driver')) {
+                'openai' => new OpenAiCompatibleExtractionProvider(config('ai.extraction.openai')),
+                default => new FakeExtractionProvider,
+            };
+        });
     }
 
     /**

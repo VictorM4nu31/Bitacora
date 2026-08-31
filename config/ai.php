@@ -24,4 +24,26 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | LLM Extraction
+    |--------------------------------------------------------------------------
+    |
+    | Extracts structured report data from a transcript. Use "fake" for
+    | development/tests and "openai" for OpenAI / DeepSeek / any OpenAI-
+    | compatible endpoint.
+    |
+    */
+
+    'extraction' => [
+        'driver' => env('LLM_DRIVER', 'fake'),
+
+        'openai' => [
+            'base_url' => env('LLM_BASE_URL', 'https://api.openai.com/v1'),
+            'model' => env('LLM_MODEL', 'gpt-4o-mini'),
+            'key' => env('LLM_API_KEY'),
+            'timeout' => env('LLM_TIMEOUT', 60),
+        ],
+    ],
+
 ];
