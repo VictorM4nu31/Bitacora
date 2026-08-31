@@ -16,6 +16,8 @@
 .ai/
 /.playwright-mcp/
 /nativephp/
+/native
+/nativephp.lock
 .opencode/
 .opencode.json
 .agents/
