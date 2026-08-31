@@ -7,6 +7,7 @@ use App\Http\Requests\StoreEquipmentRequest;
 use App\Http\Requests\UpdateEquipmentRequest;
 use App\Models\Customer;
 use App\Models\Equipment;
+use App\Models\ServiceOrder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -52,15 +53,31 @@ class EquipmentController extends Controller
     /**
      * Display the specified equipment.
      */
-    public function show(Equipment $equipment): Response
+    public function show(Request $request, Equipment $equipment): Response
     {
         Gate::authorize('view', $equipment);
 
         $equipment->load('customer');
 
+        $history = ServiceOrder::query()
+            ->forCompany($request->user()->company_id)
+            ->where('equipment_id', $equipment->id)
+            ->with(['customer:id,name', 'report'])
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(fn (ServiceOrder $order) => [
+                'id' => $order->id,
+                'status' => $order->status->value,
+                'statusLabel' => $order->status->label(),
+                'customer_name' => $order->customer?->name,
+                'report_status' => $order->report?->status->value,
+                'date' => $order->created_at->format('d/m/Y H:i'),
+            ]);
+
         return Inertia::render('equipment/show', [
             'equipment' => $equipment,
-            ...$this->formOptions(request()),
+            'history' => $history,
+            ...$this->formOptions($request),
         ]);
     }
 
