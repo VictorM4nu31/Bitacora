@@ -5,6 +5,7 @@ use App\Enums\ReportStatus;
 use App\Models\AudioRecord;
 use App\Models\Company;
 use App\Models\Customer;
+use App\Models\ReportEvent;
 use App\Models\ServiceOrder;
 use App\Models\ServiceReport;
 use App\Models\User;
@@ -171,4 +172,44 @@ test('the shared customer view requires a valid signature', function () {
     // With a valid signature -> 200.
     $url = app(ReportShareService::class)->shareUrl($report, 60);
     $this->get($url)->assertOk();
+});
+
+test('creating a draft from audio records an audit event', function () {
+    $company = Company::factory()->create();
+    $user = User::factory()->forCompany($company)->create();
+    $order = ServiceOrder::factory()->forCompany($company)->create([
+        'technician_id' => $user->id,
+        'customer_id' => Customer::factory()->forCompany($company),
+    ]);
+    $audio = AudioRecord::factory()->forServiceOrder($order)->status(AudioRecordStatus::Transcribed)->create([
+        'extracted_data' => ['work_done' => 'x'],
+        'transcription_ms' => 120,
+        'analysis_ms' => 40,
+    ]);
+
+    app(ReportService::class)->createDraftFromAudio($audio);
+
+    $report = $order->fresh()->report;
+
+    expect(ReportEvent::where('service_report_id', $report->id)->count())->toBe(1)
+        ->and(ReportEvent::where('service_report_id', $report->id)->value('action'))->toBe('created')
+        ->and(ReportEvent::where('service_report_id', $report->id)->value('user_id'))->toBeNull();
+});
+
+test('finalizing a report records a finalized audit event by the user', function () {
+    $company = Company::factory()->create();
+    $user = User::factory()->forCompany($company)->create();
+    $order = ServiceOrder::factory()->forCompany($company)->create([
+        'technician_id' => $user->id,
+        'customer_id' => Customer::factory()->forCompany($company),
+    ]);
+    $report = ServiceReport::factory()->forServiceOrder($order)->status(ReportStatus::Draft)->create();
+
+    app(ReportService::class)->finalize($report, $user);
+
+    $event = ReportEvent::where('service_report_id', $report->id)->latest()->first();
+
+    expect($event->action)->toBe('finalized')
+        ->and($event->user_id)->toBe($user->id)
+        ->and($event->new_status)->toBe('finalized');
 });
