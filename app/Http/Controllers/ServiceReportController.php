@@ -24,7 +24,7 @@ class ServiceReportController extends Controller
     {
         Gate::authorize('update', $serviceReport);
 
-        $reportService->update($serviceReport, $request->validated());
+        $reportService->update($serviceReport, $request->validated(), $request->user());
 
         return to_route('service-orders.show', $serviceReport->serviceOrder);
     }
@@ -36,7 +36,8 @@ class ServiceReportController extends Controller
     {
         Gate::authorize('update', $serviceReport);
 
-        $reportService->finalize($serviceReport);
+        $serviceReport->load('serviceOrder');
+        $reportService->finalize($serviceReport, $request->user());
 
         return to_route('service-orders.show', $serviceReport->serviceOrder);
     }

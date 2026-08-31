@@ -67,6 +67,16 @@ class ServiceReport extends Model
     }
 
     /**
+     * The voice note that produced this report.
+     *
+     * @return BelongsTo<AudioRecord, $this>
+     */
+    public function audioRecord(): BelongsTo
+    {
+        return $this->belongsTo(AudioRecord::class, 'audio_record_id');
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
