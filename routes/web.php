@@ -4,6 +4,7 @@ use App\Http\Controllers\AudioRecordController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\EquipmentController;
 use App\Http\Controllers\ServiceOrderController;
+use App\Http\Controllers\ServiceReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
@@ -19,6 +20,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('service-orders.audio');
     Route::get('audio-records/{audio_record}/status', [AudioRecordController::class, 'status'])
         ->name('audio-records.status');
+
+    Route::put('service-reports/{service_report}', [ServiceReportController::class, 'update'])
+        ->name('service-reports.update');
+    Route::post('service-reports/{service_report}/finalize', [ServiceReportController::class, 'finalize'])
+        ->name('service-reports.finalize');
 });
 
 require __DIR__.'/settings.php';
