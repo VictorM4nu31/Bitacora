@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int $id
@@ -52,6 +53,16 @@ class ServiceOrder extends Model
     public function technician(): BelongsTo
     {
         return $this->belongsTo(User::class, 'technician_id');
+    }
+
+    /**
+     * Voice notes recorded for the service order.
+     *
+     * @return HasMany<AudioRecord, $this>
+     */
+    public function audioRecords(): HasMany
+    {
+        return $this->hasMany(AudioRecord::class);
     }
 
     /**

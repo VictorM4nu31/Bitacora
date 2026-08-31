@@ -61,10 +61,16 @@ class ServiceOrderController extends Controller
         Gate::authorize('view', $serviceOrder);
 
         $serviceOrder->load(['customer', 'equipment', 'technician']);
+        $audioRecords = $serviceOrder
+            ->audioRecords()
+            ->orderByDesc('created_at')
+            ->get();
 
         return Inertia::render('service_orders/show', [
             'order' => $serviceOrder,
             'statuses' => $this->statusOptions(),
+            'audioUrl' => route('service-orders.audio', $serviceOrder),
+            'audioRecords' => $audioRecords,
             ...$this->formOptions(request()),
         ]);
     }
