@@ -7,6 +7,7 @@ use App\Http\Requests\StoreEquipmentRequest;
 use App\Http\Requests\UpdateEquipmentRequest;
 use App\Models\Customer;
 use App\Models\Equipment;
+use App\Models\MaintenanceSchedule;
 use App\Models\ServiceOrder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -74,9 +75,24 @@ class EquipmentController extends Controller
                 'date' => $order->created_at->format('d/m/Y H:i'),
             ]);
 
+        $maintenance = MaintenanceSchedule::query()
+            ->forCompany($request->user()->company_id)
+            ->where('equipment_id', $equipment->id)
+            ->orderBy('next_due_at')
+            ->get()
+            ->map(fn (MaintenanceSchedule $schedule) => [
+                'id' => $schedule->id,
+                'interval_days' => $schedule->interval_days,
+                'next_due_at' => $schedule->next_due_at?->format('d/m/Y'),
+                'enabled' => $schedule->enabled,
+            ]);
+
         return Inertia::render('equipment/show', [
             'equipment' => $equipment,
             'history' => $history,
+            'maintenance' => $maintenance,
+            'maintenanceUrl' => route('equipment.maintenance', $equipment),
+            'completeMaintenanceUrl' => route('maintenance-schedules.complete', ['maintenance_schedule' => '__ID__']),
             ...$this->formOptions($request),
         ]);
     }

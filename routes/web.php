@@ -3,6 +3,7 @@
 use App\Http\Controllers\AudioRecordController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\EquipmentController;
+use App\Http\Controllers\MaintenanceScheduleController;
 use App\Http\Controllers\ServiceOrderController;
 use App\Http\Controllers\ServicePhotoController;
 use App\Http\Controllers\ServiceReportController;
@@ -16,6 +17,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('customers', CustomerController::class)->except(['create', 'edit']);
     Route::resource('equipment', EquipmentController::class)->except(['create', 'edit']);
     Route::resource('service-orders', ServiceOrderController::class)->except(['create', 'edit']);
+
+    Route::post('equipment/{equipment}/maintenance', [MaintenanceScheduleController::class, 'store'])
+        ->name('equipment.maintenance');
+    Route::post('maintenance-schedules/{maintenance_schedule}/complete', [MaintenanceScheduleController::class, 'complete'])
+        ->name('maintenance-schedules.complete');
 
     Route::post('service-orders/{service_order}/audio', [AudioRecordController::class, 'store'])
         ->name('service-orders.audio');

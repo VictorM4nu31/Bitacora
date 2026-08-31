@@ -1,5 +1,6 @@
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { useState, type FormEvent } from 'react';
+import { toast } from 'sonner';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
@@ -49,15 +50,45 @@ type HistoryItem = {
     date: string;
 };
 
+type MaintenanceItem = {
+    id: number;
+    interval_days: number;
+    next_due_at: string | null;
+    enabled: boolean;
+};
+
 type PageProps = {
     equipment: EquipmentDetail;
     history: HistoryItem[];
+    maintenance: MaintenanceItem[];
+    maintenanceUrl: string;
+    completeMaintenanceUrl: string;
     customers: { id: number; name: string }[];
     types: { value: string; label: string }[];
 };
 
 export default function EquipmentShow() {
-    const { equipment, history, customers, types } = usePage<PageProps>().props;
+    const {
+        equipment,
+        history,
+        maintenance,
+        maintenanceUrl,
+        completeMaintenanceUrl,
+        customers,
+        types,
+    } = usePage<PageProps>().props;
+
+    const scheduleForm = useForm({ interval_days: '90' });
+
+    function scheduleMaintenance(event: FormEvent) {
+        event.preventDefault();
+        scheduleForm.post(maintenanceUrl, { preserveScroll: true, onSuccess: () => scheduleForm.reset() });
+    }
+
+    function complete(item: MaintenanceItem) {
+        const url = completeMaintenanceUrl.replace('__ID__', String(item.id));
+        router.post(url, {}, { preserveScroll: true });
+    }
     const [editOpen, setEditOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
 
@@ -278,6 +309,66 @@ export default function EquipmentShow() {
                                 <span className="text-muted-foreground">Notas:</span>{' '}
                                 {equipment.notes}
                             </p>
+                        )}
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Mantenimientos programados</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <form onSubmit={scheduleMaintenance} className="flex items-end gap-2">
+                            <div className="grid max-w-48 gap-1">
+                                <label
+                                    htmlFor="interval"
+                                    className="text-muted-foreground text-sm"
+                                >
+                                    Cada (días)
+                                </label>
+                                <input
+                                    id="interval"
+                                    type="number"
+                                    min={1}
+                                    value={scheduleForm.data.interval_days}
+                                    onChange={(e) => scheduleForm.setData('interval_days', e.target.value)}
+                                    className="border-input h-9 rounded-md border bg-transparent px-3 text-sm"
+                                />
+                            </div>
+                            <Button type="submit" disabled={scheduleForm.processing}>
+                                Programar
+                            </Button>
+                        </form>
+
+                        {maintenance.length === 0 ? (
+                            <p className="text-muted-foreground text-sm">
+                                Sin mantenimientos programados para este equipo.
+                            </p>
+                        ) : (
+                            <ul className="space-y-2">
+                                {maintenance.map((item) => (
+                                    <li
+                                        key={item.id}
+                                        className="border-muted flex items-center justify-between rounded-lg border px-3 py-2 text-sm"
+                                    >
+                                        <div>
+                                            <p className="font-medium">
+                                                {item.next_due_at ?? 'Sin fecha'} — cada {item.interval_days} días
+                                            </p>
+                                            <p className="text-muted-foreground text-xs">
+                                                {item.enabled ? 'Activo' : 'Pausado'}
+                                            </p>
+                                        </div>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => complete(item)}
+                                        >
+                                            Marcar realizado
+                                        </Button>
+                                    </li>
+                                ))}
+                            </ul>
                         )}
                     </CardContent>
                 </Card>
