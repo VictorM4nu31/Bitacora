@@ -1,0 +1,38 @@
+<?php
+
+namespace App\Http\Requests;
+
+use App\Enums\ServiceOrderStatus;
+use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+
+class UpdateServiceOrderRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     */
+    public function authorize(): bool
+    {
+        $order = $this->route('service_order');
+
+        return $this->user()?->company_id === $order->company_id;
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, ValidationRule|array<mixed>|string>
+     */
+    public function rules(): array
+    {
+        $companyId = $this->user()->company_id;
+
+        return [
+            'status' => ['sometimes', 'string', Rule::enum(ServiceOrderStatus::class)],
+            'scheduled_at' => ['nullable', 'date'],
+            'customer_id' => ['sometimes', 'integer', Rule::exists('customers', 'id')->where('company_id', $companyId)],
+            'equipment_id' => ['sometimes', 'nullable', 'integer', Rule::exists('equipment', 'id')->where('company_id', $companyId)],
+        ];
+    }
+}
