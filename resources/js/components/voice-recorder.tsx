@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from '@sematico/laravel-inertia-i18n-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -109,16 +109,40 @@ export default function VoiceRecorder({ audioUrl, initial }: Props) {
             });
     }
 
-    useEffect(() => {
-        const active = items.filter(
-            (item) =>
-                item.statusUrl &&
-                (item.status === 'uploaded' || item.status === 'processing'),
-        );
+    const itemsRef = useRef<AudioItem[]>(items);
 
-        if (active.length === 0) return;
+    useEffect(() => {
+        itemsRef.current = items;
+    }, [items]);
+
+    // Identifica los items activos por sus ids. Como el conjunto de ids no cambia
+    // mientras se actualiza el estado interno, la firma es estable y el efecto
+    // no se vuelve a suscribir en cada tick (evita polls solapados).
+    const activeSignature = useMemo(
+        () =>
+            items
+                .filter(
+                    (item) =>
+                        item.statusUrl &&
+                        (item.status === 'uploaded' ||
+                            item.status === 'processing'),
+                )
+                .map((item) => item.id)
+                .join(','),
+        [items],
+    );
+
+    useEffect(() => {
+        if (activeSignature === '') return;
 
         const poll = async () => {
+            const active = itemsRef.current.filter(
+                (item) =>
+                    item.statusUrl &&
+                    (item.status === 'uploaded' ||
+                        item.status === 'processing'),
+            );
+
             for (const item of active) {
                 if (!item.statusUrl) continue;
                 try {
@@ -153,7 +177,7 @@ export default function VoiceRecorder({ audioUrl, initial }: Props) {
         return () => {
             if (pollingRef.current) window.clearInterval(pollingRef.current);
         };
-    }, [items]);
+    }, [activeSignature]);
 
     function stopRecording() {
         if (timerRef.current) window.clearInterval(timerRef.current);
