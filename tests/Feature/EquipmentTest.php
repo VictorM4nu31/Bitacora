@@ -95,9 +95,9 @@ test('a customer has many equipment through the relation', function () {
     expect($customer->equipment()->count())->toBe(2);
 });
 
-test('equipment can be deleted (soft) by its company member', function () {
+test('equipment can be deleted (soft) by an admin of its company', function () {
     $company = Company::factory()->create();
-    $user = User::factory()->forCompany($company)->create();
+    $user = User::factory()->forCompany($company)->admin()->create();
     $equipment = Equipment::factory()->forCompany($company)->create();
 
     $this->actingAs($user)->delete(route('equipment.destroy', $equipment))

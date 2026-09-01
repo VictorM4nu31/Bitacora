@@ -20,6 +20,34 @@ class ServiceReportPolicy
      */
     public function update(User $user, ServiceReport $report): bool
     {
-        return $user->company_id === $report->company_id;
+        return $user->company_id === $report->company_id
+            && ($user->isAdmin() || $user->hasPermissionTo('update reports'));
+    }
+
+    /**
+     * Determine whether the user can finalize the service report.
+     */
+    public function finalize(User $user, ServiceReport $report): bool
+    {
+        return $user->company_id === $report->company_id
+            && ($user->isAdmin() || $user->hasPermissionTo('finalize reports'));
+    }
+
+    /**
+     * Determine whether the user can generate a PDF of the report.
+     */
+    public function generatePdf(User $user, ServiceReport $report): bool
+    {
+        return $user->company_id === $report->company_id
+            && ($user->isAdmin() || $user->hasPermissionTo('generate pdf'));
+    }
+
+    /**
+     * Determine whether the user can share the report with the customer.
+     */
+    public function share(User $user, ServiceReport $report): bool
+    {
+        return $user->company_id === $report->company_id
+            && ($user->isAdmin() || $user->hasPermissionTo('share reports'));
     }
 }

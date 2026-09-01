@@ -43,9 +43,11 @@ class UserFactory extends Factory
      */
     public function forCompany(Company|int $company): static
     {
-        return $this->state(fn (array $attributes) => [
-            'company_id' => $company instanceof Company ? $company->getKey() : $company,
-        ]);
+        return $this
+            ->state(fn (array $attributes) => [
+                'company_id' => $company instanceof Company ? $company->getKey() : $company,
+            ])
+            ->afterCreating(fn (User $user) => $user->assignRole(Role::findOrCreate('technician')));
     }
 
     /**

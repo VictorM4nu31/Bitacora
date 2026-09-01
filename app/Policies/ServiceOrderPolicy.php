@@ -28,7 +28,7 @@ class ServiceOrderPolicy
      */
     public function create(User $user): bool
     {
-        return $user->company_id !== null;
+        return $user->isAdmin() || $user->hasPermissionTo('create services');
     }
 
     /**
@@ -36,7 +36,8 @@ class ServiceOrderPolicy
      */
     public function update(User $user, ServiceOrder $order): bool
     {
-        return $user->company_id === $order->company_id;
+        return $user->company_id === $order->company_id
+            && ($user->isAdmin() || $user->hasPermissionTo('update services'));
     }
 
     /**
@@ -44,6 +45,7 @@ class ServiceOrderPolicy
      */
     public function delete(User $user, ServiceOrder $order): bool
     {
-        return $user->company_id === $order->company_id;
+        return $user->company_id === $order->company_id
+            && ($user->isAdmin() || $user->hasPermissionTo('delete services'));
     }
 }
