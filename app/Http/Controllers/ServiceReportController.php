@@ -34,7 +34,7 @@ class ServiceReportController extends Controller
      */
     public function finalize(FinalizeReportRequest $request, ServiceReport $serviceReport, ReportService $reportService): RedirectResponse
     {
-        Gate::authorize('update', $serviceReport);
+        Gate::authorize('finalize', $serviceReport);
 
         $serviceReport->load('serviceOrder');
         $reportService->finalize($serviceReport, $request->user());
@@ -47,7 +47,7 @@ class ServiceReportController extends Controller
      */
     public function pdf(ServiceReport $serviceReport, ReportPdfService $pdfService): StreamedResponse
     {
-        Gate::authorize('view', $serviceReport);
+        Gate::authorize('generatePdf', $serviceReport);
 
         $path = $serviceReport->pdf_path ?? $pdfService->generate($serviceReport);
 
@@ -59,7 +59,7 @@ class ServiceReportController extends Controller
      */
     public function share(ServiceReport $serviceReport, ReportShareService $shareService): JsonResponse
     {
-        Gate::authorize('view', $serviceReport);
+        Gate::authorize('share', $serviceReport);
 
         return response()->json([
             'url' => $shareService->shareUrl($serviceReport),

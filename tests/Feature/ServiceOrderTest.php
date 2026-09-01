@@ -101,9 +101,9 @@ test('completing a service sets the completed timestamp', function () {
         ->and($order->fresh()->completed_at)->not->toBeNull();
 });
 
-test('a service order can be deleted by its company member', function () {
+test('a service order can be deleted by an admin of its company', function () {
     $company = Company::factory()->create();
-    $user = User::factory()->forCompany($company)->create();
+    $user = User::factory()->forCompany($company)->admin()->create();
     $order = ServiceOrder::factory()->forCompany($company)->create([
         'technician_id' => $user->id,
         'customer_id' => Customer::factory()->forCompany($company),

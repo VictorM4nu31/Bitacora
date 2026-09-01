@@ -28,7 +28,7 @@ class EquipmentPolicy
      */
     public function create(User $user): bool
     {
-        return $user->company_id !== null;
+        return $user->isAdmin() || $user->hasPermissionTo('create equipment');
     }
 
     /**
@@ -36,7 +36,8 @@ class EquipmentPolicy
      */
     public function update(User $user, Equipment $equipment): bool
     {
-        return $user->company_id === $equipment->company_id;
+        return $user->company_id === $equipment->company_id
+            && ($user->isAdmin() || $user->hasPermissionTo('update equipment'));
     }
 
     /**
@@ -44,6 +45,16 @@ class EquipmentPolicy
      */
     public function delete(User $user, Equipment $equipment): bool
     {
-        return $user->company_id === $equipment->company_id;
+        return $user->company_id === $equipment->company_id
+            && ($user->isAdmin() || $user->hasPermissionTo('delete equipment'));
+    }
+
+    /**
+     * Determine whether the user can manage equipment maintenance.
+     */
+    public function manageMaintenance(User $user, Equipment $equipment): bool
+    {
+        return $user->company_id === $equipment->company_id
+            && ($user->isAdmin() || $user->hasPermissionTo('manage maintenance'));
     }
 }

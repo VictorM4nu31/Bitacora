@@ -19,7 +19,7 @@ class RolesAndPermissionsSeeder extends Seeder
         $permissions = [
             'view customers', 'create customers', 'update customers', 'delete customers',
             'view equipment', 'create equipment', 'update equipment', 'delete equipment',
-            'view services', 'create services', 'update services',
+            'view services', 'create services', 'update services', 'delete services',
             'view reports', 'update reports', 'finalize reports', 'generate pdf', 'share reports',
             'manage maintenance',
         ];

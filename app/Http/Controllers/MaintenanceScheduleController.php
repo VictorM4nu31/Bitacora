@@ -15,7 +15,7 @@ class MaintenanceScheduleController extends Controller
      */
     public function store(Request $request, Equipment $equipment): RedirectResponse
     {
-        Gate::authorize('view', $equipment);
+        Gate::authorize('manageMaintenance', $equipment);
 
         $request->validate([
             'interval_days' => ['required', 'integer', 'min:1', 'max:3650'],
@@ -38,7 +38,7 @@ class MaintenanceScheduleController extends Controller
      */
     public function complete(MaintenanceSchedule $maintenanceSchedule): RedirectResponse
     {
-        Gate::authorize('view', $maintenanceSchedule->equipment);
+        Gate::authorize('manageMaintenance', $maintenanceSchedule->equipment);
 
         $maintenanceSchedule->advance();
 

@@ -71,9 +71,9 @@ test('name is required to create a customer', function () {
     ])->assertSessionHasErrors('name');
 });
 
-test('a customer can be deleted (soft) by its company member', function () {
+test('a customer can be deleted (soft) by an admin of its company', function () {
     $company = Company::factory()->create();
-    $user = User::factory()->forCompany($company)->create();
+    $user = User::factory()->forCompany($company)->admin()->create();
     $customer = Customer::factory()->forCompany($company)->create();
 
     $this->actingAs($user)->delete(route('customers.destroy', $customer))
