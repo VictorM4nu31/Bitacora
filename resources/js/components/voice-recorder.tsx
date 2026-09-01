@@ -19,7 +19,9 @@ type Props = {
 type Phase = 'idle' | 'recording' | 'uploading' | 'done' | 'error';
 
 function getCookie(name: string): string | null {
-    const match = document.cookie.match(new RegExp('(^|;\\s*)' + name + '=([^;]*)'));
+    const match = document.cookie.match(
+        new RegExp('(^|;\\s*)' + name + '=([^;]*)'),
+    );
     return match ? decodeURIComponent(match[2]) : null;
 }
 
@@ -74,12 +76,18 @@ export default function VoiceRecorder({ audioUrl, initial }: Props) {
                         stream.getTracks().forEach((track) => track.stop());
                     }
 
-                    const duration = Math.round(Date.now() - startTimeRef.current);
-                    const blob = new Blob(chunksRef.current, { type: recorder.mimeType });
+                    const duration = Math.round(
+                        Date.now() - startTimeRef.current,
+                    );
+                    const blob = new Blob(chunksRef.current, {
+                        type: recorder.mimeType,
+                    });
 
                     if (blob.size === 0) {
                         setPhase('idle');
-                        setError(t('The recording was empty. Please try again.'));
+                        setError(
+                            t('The recording was empty. Please try again.'),
+                        );
                         return;
                     }
 
@@ -93,13 +101,19 @@ export default function VoiceRecorder({ audioUrl, initial }: Props) {
             })
             .catch(() => {
                 setPhase('idle');
-                setError(t('Could not access the microphone. Check your permissions.'));
+                setError(
+                    t(
+                        'Could not access the microphone. Check your permissions.',
+                    ),
+                );
             });
     }
 
     useEffect(() => {
         const active = items.filter(
-            (item) => item.statusUrl && (item.status === 'uploaded' || item.status === 'processing'),
+            (item) =>
+                item.statusUrl &&
+                (item.status === 'uploaded' || item.status === 'processing'),
         );
 
         if (active.length === 0) return;
@@ -108,13 +122,22 @@ export default function VoiceRecorder({ audioUrl, initial }: Props) {
             for (const item of active) {
                 if (!item.statusUrl) continue;
                 try {
-                    const res = await fetch(item.statusUrl, { headers: { Accept: 'application/json' } });
+                    const res = await fetch(item.statusUrl, {
+                        headers: { Accept: 'application/json' },
+                    });
                     if (!res.ok) continue;
-                    const data = (await res.json()) as AudioItem & { statusLabel?: string };
+                    const data = (await res.json()) as AudioItem & {
+                        statusLabel?: string;
+                    };
                     setItems((prev) =>
                         prev.map((i) =>
                             i.id === data.id
-                                ? { ...i, status: data.status, transcript: data.transcript ?? i.transcript }
+                                ? {
+                                      ...i,
+                                      status: data.status,
+                                      transcript:
+                                          data.transcript ?? i.transcript,
+                                  }
                                 : i,
                         ),
                     );
@@ -163,13 +186,20 @@ export default function VoiceRecorder({ audioUrl, initial }: Props) {
                 statusUrl: string;
             };
             setItems((prev) => [
-                { id: data.id, status: data.status, duration_ms: duration, statusUrl: data.statusUrl },
+                {
+                    id: data.id,
+                    status: data.status,
+                    duration_ms: duration,
+                    statusUrl: data.statusUrl,
+                },
                 ...prev,
             ]);
             setPhase('done');
         } catch {
             setPhase('error');
-            setError(t('Could not upload the voice note. Check your connection.'));
+            setError(
+                t('Could not upload the voice note. Check your connection.'),
+            );
         }
     }
 
@@ -193,7 +223,9 @@ export default function VoiceRecorder({ audioUrl, initial }: Props) {
                 )}
 
                 {phase === 'uploading' && (
-                    <span className="text-muted-foreground text-sm">{t('Uploading…')}</span>
+                    <span className="text-muted-foreground text-sm">
+                        {t('Uploading…')}
+                    </span>
                 )}
                 {phase === 'done' && (
                     <span className="text-sm text-green-600 dark:text-green-400">
@@ -202,7 +234,11 @@ export default function VoiceRecorder({ audioUrl, initial }: Props) {
                 )}
             </div>
 
-            {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+            {error && (
+                <p className="text-sm text-red-600 dark:text-red-400">
+                    {error}
+                </p>
+            )}
 
             {items.length > 0 && (
                 <ul className="space-y-2">
@@ -218,15 +254,22 @@ export default function VoiceRecorder({ audioUrl, initial }: Props) {
                                         ? ` (${Math.round(item.duration_ms / 1000)}s)`
                                         : ''}
                                 </span>
-                                <Badge variant="secondary" className={STATUS_STYLES[item.status]}>
-                                    {t(STATUS_LABELS[item.status] ?? item.status)}
+                                <Badge
+                                    variant="secondary"
+                                    className={STATUS_STYLES[item.status]}
+                                >
+                                    {t(
+                                        STATUS_LABELS[item.status] ??
+                                            item.status,
+                                    )}
                                 </Badge>
                             </div>
-                            {item.status === 'transcribed' && item.transcript && (
-                                <p className="text-foreground mt-2 line-clamp-3 whitespace-pre-wrap">
-                                    {item.transcript}
-                                </p>
-                            )}
+                            {item.status === 'transcribed' &&
+                                item.transcript && (
+                                    <p className="text-foreground mt-2 line-clamp-3 whitespace-pre-wrap">
+                                        {item.transcript}
+                                    </p>
+                                )}
                         </li>
                     ))}
                 </ul>

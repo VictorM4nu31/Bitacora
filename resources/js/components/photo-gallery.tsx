@@ -14,7 +14,9 @@ type Props = {
 };
 
 function getCookie(name: string): string | null {
-    const match = document.cookie.match(new RegExp('(^|;\\s*)' + name + '=([^;]*)'));
+    const match = document.cookie.match(
+        new RegExp('(^|;\\s*)' + name + '=([^;]*)'),
+    );
     return match ? decodeURIComponent(match[2]) : null;
 }
 
@@ -54,7 +56,9 @@ export default function PhotoGallery({ photoUploadUrl, initial }: Props) {
             setPhotos((prev) => [...prev, data]);
             input.value = '';
         } catch {
-            setError(t('Could not upload the photo. Check the format and size.'));
+            setError(
+                t('Could not upload the photo. Check the format and size.'),
+            );
         } finally {
             setUploading(false);
         }
@@ -78,10 +82,18 @@ export default function PhotoGallery({ photoUploadUrl, initial }: Props) {
                 >
                     {t('Upload photo')}
                 </Button>
-                {uploading && <span className="text-muted-foreground text-sm">{t('Uploading…')}</span>}
+                {uploading && (
+                    <span className="text-muted-foreground text-sm">
+                        {t('Uploading…')}
+                    </span>
+                )}
             </div>
 
-            {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+            {error && (
+                <p className="text-sm text-red-600 dark:text-red-400">
+                    {error}
+                </p>
+            )}
 
             {photos.length === 0 ? (
                 <p className="text-muted-foreground text-sm">
@@ -90,7 +102,10 @@ export default function PhotoGallery({ photoUploadUrl, initial }: Props) {
             ) : (
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
                     {photos.map((photo) => (
-                        <div key={photo.id} className="overflow-hidden rounded-lg border">
+                        <div
+                            key={photo.id}
+                            className="overflow-hidden rounded-lg border"
+                        >
                             <img
                                 src={photo.url}
                                 alt={photo.original_name}

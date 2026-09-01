@@ -52,7 +52,8 @@ const STATUS_STYLES: Record<string, string> = {
 
 export default function ServiceOrders() {
     const { t } = useTranslation();
-    const { orders, statuses, customers, equipment } = usePage<PageProps>().props;
+    const { orders, statuses, customers, equipment } =
+        usePage<PageProps>().props;
     const [open, setOpen] = useState(false);
 
     const form = useForm({
@@ -98,7 +99,9 @@ export default function ServiceOrders() {
 
                             <form onSubmit={submit} className="space-y-4">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="customer">{t('Customer')} *</Label>
+                                    <Label htmlFor="customer">
+                                        {t('Customer')} *
+                                    </Label>
                                     <Select
                                         value={String(form.data.customer_id)}
                                         onValueChange={(v) => {
@@ -107,7 +110,11 @@ export default function ServiceOrders() {
                                         }}
                                     >
                                         <SelectTrigger>
-                                            <SelectValue placeholder={t('Select a customer')} />
+                                            <SelectValue
+                                                placeholder={t(
+                                                    'Select a customer',
+                                                )}
+                                            />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {customers.map((customer) => (
@@ -120,38 +127,62 @@ export default function ServiceOrders() {
                                             ))}
                                         </SelectContent>
                                     </Select>
-                                    <InputError message={form.errors.customer_id} />
+                                    <InputError
+                                        message={form.errors.customer_id}
+                                    />
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="equipment">{t('Equipment')}</Label>
+                                    <Label htmlFor="equipment">
+                                        {t('Equipment')}
+                                    </Label>
                                     <Select
                                         value={String(form.data.equipment_id)}
-                                        onValueChange={(v) => form.setData('equipment_id', v)}
+                                        onValueChange={(v) =>
+                                            form.setData('equipment_id', v)
+                                        }
                                     >
                                         <SelectTrigger>
-                                            <SelectValue placeholder={t('Select equipment (optional)')} />
+                                            <SelectValue
+                                                placeholder={t(
+                                                    'Select equipment (optional)',
+                                                )}
+                                            />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {equipment.map((item) => (
-                                                <SelectItem key={item.id} value={String(item.id)}>
+                                                <SelectItem
+                                                    key={item.id}
+                                                    value={String(item.id)}
+                                                >
                                                     {item.name}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
-                                    <InputError message={form.errors.equipment_id} />
+                                    <InputError
+                                        message={form.errors.equipment_id}
+                                    />
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="scheduled_at">{t('Scheduled date')}</Label>
+                                    <Label htmlFor="scheduled_at">
+                                        {t('Scheduled date')}
+                                    </Label>
                                     <Input
                                         id="scheduled_at"
                                         type="datetime-local"
                                         value={form.data.scheduled_at}
-                                        onChange={(e) => form.setData('scheduled_at', e.target.value)}
+                                        onChange={(e) =>
+                                            form.setData(
+                                                'scheduled_at',
+                                                e.target.value,
+                                            )
+                                        }
                                     />
-                                    <InputError message={form.errors.scheduled_at} />
+                                    <InputError
+                                        message={form.errors.scheduled_at}
+                                    />
                                 </div>
 
                                 <div className="flex justify-end gap-2">
@@ -162,7 +193,10 @@ export default function ServiceOrders() {
                                     >
                                         {t('Cancel')}
                                     </Button>
-                                    <Button type="submit" disabled={form.processing}>
+                                    <Button
+                                        type="submit"
+                                        disabled={form.processing}
+                                    >
                                         {t('Create')}
                                     </Button>
                                 </div>
@@ -181,16 +215,20 @@ export default function ServiceOrders() {
                             <Link
                                 key={order.id}
                                 href={show.url({ service_order: order.id })}
-                                className="hover:bg-muted grid border-b px-4 py-3 transition-colors last:border-b-0 dark:hover:bg-muted/40"
+                                className="hover:bg-muted dark:hover:bg-muted/40 grid border-b px-4 py-3 transition-colors last:border-b-0"
                             >
                                 <div className="grid grid-cols-1 items-center gap-2 sm:grid-cols-[auto_1fr_auto]">
                                     <div className="min-w-0">
                                         <p className="truncate font-medium">
-                                            {order.customer?.name ?? t('No customer')}
+                                            {order.customer?.name ??
+                                                t('No customer')}
                                         </p>
                                         <p className="text-muted-foreground text-sm">
-                                            {order.equipment?.name ?? t('No equipment')}
-                                            {order.technician ? ` · ${order.technician.name}` : ''}
+                                            {order.equipment?.name ??
+                                                t('No equipment')}
+                                            {order.technician
+                                                ? ` · ${order.technician.name}`
+                                                : ''}
                                         </p>
                                     </div>
                                     <Badge

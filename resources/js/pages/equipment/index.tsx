@@ -97,13 +97,21 @@ export default function Equipment() {
 
                             <form onSubmit={submit} className="space-y-4">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="customer">{t('Customer')} *</Label>
+                                    <Label htmlFor="customer">
+                                        {t('Customer')} *
+                                    </Label>
                                     <Select
                                         value={String(form.data.customer_id)}
-                                        onValueChange={(v) => form.setData('customer_id', v)}
+                                        onValueChange={(v) =>
+                                            form.setData('customer_id', v)
+                                        }
                                     >
                                         <SelectTrigger>
-                                            <SelectValue placeholder={t('Select a customer')} />
+                                            <SelectValue
+                                                placeholder={t(
+                                                    'Select a customer',
+                                                )}
+                                            />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {customers.map((customer) => (
@@ -116,7 +124,9 @@ export default function Equipment() {
                                             ))}
                                         </SelectContent>
                                     </Select>
-                                    <InputError message={form.errors.customer_id} />
+                                    <InputError
+                                        message={form.errors.customer_id}
+                                    />
                                 </div>
 
                                 <div className="grid gap-2">
@@ -124,8 +134,12 @@ export default function Equipment() {
                                     <Input
                                         id="name"
                                         value={form.data.name}
-                                        onChange={(e) => form.setData('name', e.target.value)}
-                                        placeholder={t('E.g. Mini split 1.5 ton')}
+                                        onChange={(e) =>
+                                            form.setData('name', e.target.value)
+                                        }
+                                        placeholder={t(
+                                            'E.g. Mini split 1.5 ton',
+                                        )}
                                         autoFocus
                                     />
                                     <InputError message={form.errors.name} />
@@ -135,14 +149,21 @@ export default function Equipment() {
                                     <Label htmlFor="type">{t('Type')} *</Label>
                                     <Select
                                         value={String(form.data.type)}
-                                        onValueChange={(v) => form.setData('type', v)}
+                                        onValueChange={(v) =>
+                                            form.setData('type', v)
+                                        }
                                     >
                                         <SelectTrigger>
-                                            <SelectValue placeholder={t('Select a type')} />
+                                            <SelectValue
+                                                placeholder={t('Select a type')}
+                                            />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {types.map((type) => (
-                                                <SelectItem key={type.value} value={type.value}>
+                                                <SelectItem
+                                                    key={type.value}
+                                                    value={type.value}
+                                                >
                                                     {type.label}
                                                 </SelectItem>
                                             ))}
@@ -156,7 +177,12 @@ export default function Equipment() {
                                     <Input
                                         id="brand"
                                         value={form.data.brand}
-                                        onChange={(e) => form.setData('brand', e.target.value)}
+                                        onChange={(e) =>
+                                            form.setData(
+                                                'brand',
+                                                e.target.value,
+                                            )
+                                        }
                                     />
                                     <InputError message={form.errors.brand} />
                                 </div>
@@ -166,19 +192,33 @@ export default function Equipment() {
                                     <Input
                                         id="model"
                                         value={form.data.model}
-                                        onChange={(e) => form.setData('model', e.target.value)}
+                                        onChange={(e) =>
+                                            form.setData(
+                                                'model',
+                                                e.target.value,
+                                            )
+                                        }
                                     />
                                     <InputError message={form.errors.model} />
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="serial">{t('Serial number')}</Label>
+                                    <Label htmlFor="serial">
+                                        {t('Serial number')}
+                                    </Label>
                                     <Input
                                         id="serial"
                                         value={form.data.serial_number}
-                                        onChange={(e) => form.setData('serial_number', e.target.value)}
+                                        onChange={(e) =>
+                                            form.setData(
+                                                'serial_number',
+                                                e.target.value,
+                                            )
+                                        }
                                     />
-                                    <InputError message={form.errors.serial_number} />
+                                    <InputError
+                                        message={form.errors.serial_number}
+                                    />
                                 </div>
 
                                 <div className="grid gap-2">
@@ -186,7 +226,12 @@ export default function Equipment() {
                                     <textarea
                                         id="notes"
                                         value={form.data.notes}
-                                        onChange={(e) => form.setData('notes', e.target.value)}
+                                        onChange={(e) =>
+                                            form.setData(
+                                                'notes',
+                                                e.target.value,
+                                            )
+                                        }
                                         className="border-input min-h-20 w-full rounded-md border bg-transparent px-3 py-2 text-sm"
                                     />
                                     <InputError message={form.errors.notes} />
@@ -200,7 +245,10 @@ export default function Equipment() {
                                     >
                                         {t('Cancel')}
                                     </Button>
-                                    <Button type="submit" disabled={form.processing}>
+                                    <Button
+                                        type="submit"
+                                        disabled={form.processing}
+                                    >
                                         {t('Save')}
                                     </Button>
                                 </div>
@@ -219,13 +267,18 @@ export default function Equipment() {
                             <Link
                                 key={item.id}
                                 href={show.url({ equipment: item.id })}
-                                className="hover:bg-muted grid border-b px-4 py-3 transition-colors last:border-b-0 dark:hover:bg-muted/40"
+                                className="hover:bg-muted dark:hover:bg-muted/40 grid border-b px-4 py-3 transition-colors last:border-b-0"
                             >
                                 <div className="min-w-0">
-                                    <p className="truncate font-medium">{item.name}</p>
+                                    <p className="truncate font-medium">
+                                        {item.name}
+                                    </p>
                                     <p className="text-muted-foreground text-sm">
-                                        {item.customer?.name ?? t('No customer')}
-                                        {item.model ? ` · ${item.brand ?? ''} ${item.model}` : ''}
+                                        {item.customer?.name ??
+                                            t('No customer')}
+                                        {item.model
+                                            ? ` · ${item.brand ?? ''} ${item.model}`
+                                            : ''}
                                     </p>
                                 </div>
                             </Link>

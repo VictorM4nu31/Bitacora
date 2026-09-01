@@ -112,9 +112,9 @@ php artisan schedule:work          # o el scheduler del host
 
 Usuarios demo (tras `--seed`):
 
-| Correo | Contraseña | Rol |
-|---|---|---|
-| `admin@demo.test` | `password` | admin |
+| Correo              | Contraseña | Rol        |
+| ------------------- | ---------- | ---------- |
+| `admin@demo.test`   | `password` | admin      |
 | `tecnico@demo.test` | `password` | technician |
 
 ---

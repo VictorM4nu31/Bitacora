@@ -2,18 +2,12 @@ import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { useTranslation } from '@sematico/laravel-inertia-i18n-react';
 import { useState, type FormEvent } from 'react';
 import Heading from '@/components/heading';
-import InputError from '@/components/input-error';
 import PhotoGallery from '@/components/photo-gallery';
 import ReportEditor from '@/components/report-editor';
 import VoiceRecorder from '@/components/voice-recorder';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     Dialog,
     DialogContent,
@@ -129,7 +123,8 @@ export default function ServiceOrderShow() {
         scheduled_at: order.scheduled_at ?? '',
     });
 
-    const statusLabel = statuses.find((s) => s.value === order.status)?.label ?? order.status;
+    const statusLabel =
+        statuses.find((s) => s.value === order.status)?.label ?? order.status;
 
     function submitEdit(event: FormEvent) {
         event.preventDefault();
@@ -150,10 +145,15 @@ export default function ServiceOrderShow() {
 
     return (
         <>
-            <Head title={`${t('Service')} - ${order.customer?.name ?? t('No customer')}`} />
+            <Head
+                title={`${t('Service')} - ${order.customer?.name ?? t('No customer')}`}
+            />
 
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <Link href={index.url()} className="text-muted-foreground text-sm">
+                <Link
+                    href={index.url()}
+                    className="text-muted-foreground text-sm"
+                >
                     ← {t('Back to services')}
                 </Link>
 
@@ -181,27 +181,45 @@ export default function ServiceOrderShow() {
                             </DialogTrigger>
                             <DialogContent>
                                 <DialogHeader>
-                                    <DialogTitle>{t('Edit service')}</DialogTitle>
+                                    <DialogTitle>
+                                        {t('Edit service')}
+                                    </DialogTitle>
                                 </DialogHeader>
 
-                                <form onSubmit={submitEdit} className="space-y-4">
+                                <form
+                                    onSubmit={submitEdit}
+                                    className="space-y-4"
+                                >
                                     <div className="grid gap-2">
-                                        <Label htmlFor="customer">{t('Customer')} *</Label>
+                                        <Label htmlFor="customer">
+                                            {t('Customer')} *
+                                        </Label>
                                         <Select
-                                            value={String(form.data.customer_id)}
+                                            value={String(
+                                                form.data.customer_id,
+                                            )}
                                             onValueChange={(v) => {
-                                                form.setData('equipment_id', '');
+                                                form.setData(
+                                                    'equipment_id',
+                                                    '',
+                                                );
                                                 form.setData('customer_id', v);
                                             }}
                                         >
                                             <SelectTrigger>
-                                                <SelectValue placeholder={t('Select a customer')} />
+                                                <SelectValue
+                                                    placeholder={t(
+                                                        'Select a customer',
+                                                    )}
+                                                />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {customers.map((customer) => (
                                                     <SelectItem
                                                         key={customer.id}
-                                                        value={String(customer.id)}
+                                                        value={String(
+                                                            customer.id,
+                                                        )}
                                                     >
                                                         {customer.name}
                                                     </SelectItem>
@@ -211,17 +229,30 @@ export default function ServiceOrderShow() {
                                     </div>
 
                                     <div className="grid gap-2">
-                                        <Label htmlFor="equipment">{t('Equipment')}</Label>
+                                        <Label htmlFor="equipment">
+                                            {t('Equipment')}
+                                        </Label>
                                         <Select
-                                            value={String(form.data.equipment_id)}
-                                            onValueChange={(v) => form.setData('equipment_id', v)}
+                                            value={String(
+                                                form.data.equipment_id,
+                                            )}
+                                            onValueChange={(v) =>
+                                                form.setData('equipment_id', v)
+                                            }
                                         >
                                             <SelectTrigger>
-                                                <SelectValue placeholder={t('Select equipment (optional)')} />
+                                                <SelectValue
+                                                    placeholder={t(
+                                                        'Select equipment (optional)',
+                                                    )}
+                                                />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {equipment.map((item) => (
-                                                    <SelectItem key={item.id} value={String(item.id)}>
+                                                    <SelectItem
+                                                        key={item.id}
+                                                        value={String(item.id)}
+                                                    >
                                                         {item.name}
                                                     </SelectItem>
                                                 ))}
@@ -230,13 +261,18 @@ export default function ServiceOrderShow() {
                                     </div>
 
                                     <div className="grid gap-2">
-                                        <Label htmlFor="scheduled_at">{t('Scheduled date')}</Label>
+                                        <Label htmlFor="scheduled_at">
+                                            {t('Scheduled date')}
+                                        </Label>
                                         <Input
                                             id="scheduled_at"
                                             type="datetime-local"
                                             value={form.data.scheduled_at}
                                             onChange={(e) =>
-                                                form.setData('scheduled_at', e.target.value)
+                                                form.setData(
+                                                    'scheduled_at',
+                                                    e.target.value,
+                                                )
                                             }
                                         />
                                     </div>
@@ -249,7 +285,10 @@ export default function ServiceOrderShow() {
                                         >
                                             {t('Cancel')}
                                         </Button>
-                                        <Button type="submit" disabled={form.processing}>
+                                        <Button
+                                            type="submit"
+                                            disabled={form.processing}
+                                        >
                                             {t('Save')}
                                         </Button>
                                     </div>
@@ -259,14 +298,20 @@ export default function ServiceOrderShow() {
 
                         <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
                             <DialogTrigger asChild>
-                                <Button variant="destructive">{t('Delete')}</Button>
+                                <Button variant="destructive">
+                                    {t('Delete')}
+                                </Button>
                             </DialogTrigger>
                             <DialogContent>
                                 <DialogHeader>
-                                    <DialogTitle>{t('Delete service')}</DialogTitle>
+                                    <DialogTitle>
+                                        {t('Delete service')}
+                                    </DialogTitle>
                                 </DialogHeader>
                                 <p className="text-muted-foreground text-sm">
-                                    {t('This will permanently delete this service order.')}
+                                    {t(
+                                        'This will permanently delete this service order.',
+                                    )}
                                 </p>
                                 <div className="flex justify-end gap-2">
                                     <Button
@@ -275,7 +320,10 @@ export default function ServiceOrderShow() {
                                     >
                                         {t('Cancel')}
                                     </Button>
-                                    <Button variant="destructive" onClick={confirmDelete}>
+                                    <Button
+                                        variant="destructive"
+                                        onClick={confirmDelete}
+                                    >
                                         {t('Delete')}
                                     </Button>
                                 </div>
@@ -285,7 +333,10 @@ export default function ServiceOrderShow() {
                 </div>
 
                 <div className="flex">
-                    <Badge variant="secondary" className={STATUS_STYLES[order.status]}>
+                    <Badge
+                        variant="secondary"
+                        className={STATUS_STYLES[order.status]}
+                    >
                         {statusLabel}
                     </Badge>
                 </div>
@@ -296,28 +347,46 @@ export default function ServiceOrderShow() {
                     </CardHeader>
                     <CardContent className="grid gap-1 text-sm">
                         <p>
-                            <span className="text-muted-foreground">{t('Customer')}:</span>{' '}
+                            <span className="text-muted-foreground">
+                                {t('Customer')}:
+                            </span>{' '}
                             {order.customer?.name ?? '—'}
                         </p>
                         <p>
-                            <span className="text-muted-foreground">{t('Equipment')}:</span>{' '}
+                            <span className="text-muted-foreground">
+                                {t('Equipment')}:
+                            </span>{' '}
                             {order.equipment?.name ?? '—'}
                         </p>
                         <p>
-                            <span className="text-muted-foreground">{t('Technician')}:</span>{' '}
+                            <span className="text-muted-foreground">
+                                {t('Technician')}:
+                            </span>{' '}
                             {order.technician?.name ?? '—'}
                         </p>
                         <p>
-                            <span className="text-muted-foreground">{t('Scheduled')}:</span>{' '}
-                            {order.scheduled_at ? new Date(order.scheduled_at).toLocaleString() : '—'}
+                            <span className="text-muted-foreground">
+                                {t('Scheduled')}:
+                            </span>{' '}
+                            {order.scheduled_at
+                                ? new Date(order.scheduled_at).toLocaleString()
+                                : '—'}
                         </p>
                         <p>
-                            <span className="text-muted-foreground">{t('Started')}:</span>{' '}
-                            {order.started_at ? new Date(order.started_at).toLocaleString() : '—'}
+                            <span className="text-muted-foreground">
+                                {t('Started')}:
+                            </span>{' '}
+                            {order.started_at
+                                ? new Date(order.started_at).toLocaleString()
+                                : '—'}
                         </p>
                         <p>
-                            <span className="text-muted-foreground">{t('Completed')}:</span>{' '}
-                            {order.completed_at ? new Date(order.completed_at).toLocaleString() : '—'}
+                            <span className="text-muted-foreground">
+                                {t('Completed')}:
+                            </span>{' '}
+                            {order.completed_at
+                                ? new Date(order.completed_at).toLocaleString()
+                                : '—'}
                         </p>
                     </CardContent>
                 </Card>
@@ -343,7 +412,10 @@ export default function ServiceOrderShow() {
                         <CardTitle>{t('Voice note')}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <VoiceRecorder audioUrl={audioUrl} initial={audioRecords} />
+                        <VoiceRecorder
+                            audioUrl={audioUrl}
+                            initial={audioRecords}
+                        />
                     </CardContent>
                 </Card>
 
@@ -352,7 +424,10 @@ export default function ServiceOrderShow() {
                         <CardTitle>{t('Photos')}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <PhotoGallery photoUploadUrl={photoUploadUrl} initial={photos} />
+                        <PhotoGallery
+                            photoUploadUrl={photoUploadUrl}
+                            initial={photos}
+                        />
                     </CardContent>
                 </Card>
 
@@ -365,11 +440,13 @@ export default function ServiceOrderShow() {
                             {audit.ai && (
                                 <div className="grid gap-1 text-xs">
                                     <p className="text-muted-foreground">
-                                        {t('Transcription')}: {audit.ai.transcription_provider ?? '—'} ·{' '}
-                                        {audit.ai.transcription_ms ?? 0} ms
+                                        {t('Transcription')}:{' '}
+                                        {audit.ai.transcription_provider ?? '—'}{' '}
+                                        · {audit.ai.transcription_ms ?? 0} ms
                                     </p>
                                     <p className="text-muted-foreground">
-                                        {t('Analysis')}: {audit.ai.analysis_provider ?? '—'} ·{' '}
+                                        {t('Analysis')}:{' '}
+                                        {audit.ai.analysis_provider ?? '—'} ·{' '}
                                         {audit.ai.analysis_ms ?? 0} ms
                                     </p>
                                 </div>
@@ -386,10 +463,12 @@ export default function ServiceOrderShow() {
                                             className="border-muted flex items-center justify-between rounded-lg border px-3 py-2 text-sm"
                                         >
                                             <span className="text-muted-foreground">
-                                                {event.action} — {event.created_at}
+                                                {event.action} —{' '}
+                                                {event.created_at}
                                             </span>
                                             <span className="text-muted-foreground text-xs">
-                                                {event.user_name ?? t('System (AI)')}
+                                                {event.user_name ??
+                                                    t('System (AI)')}
                                             </span>
                                         </li>
                                     ))}
@@ -404,7 +483,5 @@ export default function ServiceOrderShow() {
 }
 
 ServiceOrderShow.layout = {
-    breadcrumbs: [
-        { title: 'Services', href: index.url() },
-    ],
+    breadcrumbs: [{ title: 'Services', href: index.url() }],
 };
