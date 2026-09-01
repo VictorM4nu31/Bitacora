@@ -50,7 +50,7 @@ test('completing a maintenance advances the next due date', function () {
         ->and($schedule->next_due_at->isAfter(now()))->toBeTrue();
 });
 
-test('the maintenance check command notifies company users of due schedules', function () {
+test('the maintenance check command notifies technicians of due schedules', function () {
     Notification::fake();
 
     $company = Company::factory()->create();
@@ -61,6 +61,35 @@ test('the maintenance check command notifies company users of due schedules', fu
     $this->artisan('maintenance:check')->assertSuccessful();
 
     Notification::assertSentTo($user, MaintenanceDue::class);
+});
+
+test('maintenance reminders are deduplicated on the same day', function () {
+    Notification::fake();
+
+    $company = Company::factory()->create();
+    $user = User::factory()->forCompany($company)->create();
+    $equipment = Equipment::factory()->forCompany($company)->create();
+    MaintenanceSchedule::factory()->forCompany($company)->forEquipment($equipment)->due()->create();
+
+    $this->artisan('maintenance:check')->assertSuccessful();
+    $this->artisan('maintenance:check')->assertSuccessful();
+
+    Notification::assertSentToTimes($user, MaintenanceDue::class, 1);
+});
+
+test('the maintenance check command notifies technicians only', function () {
+    Notification::fake();
+
+    $company = Company::factory()->create();
+    $technician = User::factory()->forCompany($company)->create();
+    $member = User::factory()->create(['company_id' => $company->id]);
+    $equipment = Equipment::factory()->forCompany($company)->create();
+    MaintenanceSchedule::factory()->forCompany($company)->forEquipment($equipment)->due()->create();
+
+    $this->artisan('maintenance:check')->assertSuccessful();
+
+    Notification::assertSentTo($technician, MaintenanceDue::class);
+    Notification::assertNotSentTo($member, MaintenanceDue::class);
 });
 
 test('schedule requires a valid interval', function () {

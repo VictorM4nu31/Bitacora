@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $interval_days
  * @property bool $enabled
  */
-#[Fillable(['company_id', 'equipment_id', 'customer_id', 'interval_days', 'last_run_at', 'next_due_at', 'enabled'])]
+#[Fillable(['company_id', 'equipment_id', 'customer_id', 'interval_days', 'last_run_at', 'last_notified_at', 'next_due_at', 'enabled'])]
 class MaintenanceSchedule extends Model
 {
     /** @use HasFactory<MaintenanceScheduleFactory> */
@@ -52,6 +52,7 @@ class MaintenanceSchedule extends Model
     {
         return [
             'last_run_at' => 'datetime',
+            'last_notified_at' => 'datetime',
             'next_due_at' => 'datetime',
             'enabled' => 'boolean',
             'interval_days' => 'integer',
