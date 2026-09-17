@@ -1,4 +1,4 @@
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { useTranslation } from '@sematico/laravel-inertia-i18n-react';
 import { useState, type FormEvent } from 'react';
 import Heading from '@/components/heading';
@@ -44,16 +44,22 @@ type CustomerOption = {
 };
 
 type PageProps = {
-    equipment: { data: EquipmentItem[] };
+    equipment: {
+        data: EquipmentItem[];
+        prev_page_url: string | null;
+        next_page_url: string | null;
+    };
     customers: CustomerOption[];
     types: Option[];
+    filters: { search: string };
 };
 
 export default function Equipment() {
     const { t } = useTranslation();
-    const { equipment, customers, types } = usePage<PageProps>().props;
+    const { equipment, customers, types, filters } = usePage<PageProps>().props;
     const can = useCan();
     const [open, setOpen] = useState(false);
+    const [search, setSearch] = useState(filters.search);
 
     const form = useForm({
         name: '',
@@ -75,6 +81,20 @@ export default function Equipment() {
                 setOpen(false);
             },
         });
+    }
+
+    function searchEquipment(event: FormEvent) {
+        event.preventDefault();
+
+        router.get(index.url(), { search: search.trim() }, {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    }
+
+    function clearSearch() {
+        setSearch('');
+        router.get(index.url(), {}, { preserveState: true, preserveScroll: true });
     }
 
     return (
@@ -259,6 +279,23 @@ export default function Equipment() {
                      </Dialog>}
                 </div>
 
+                <form onSubmit={searchEquipment} className="flex gap-2">
+                    <Input
+                        value={search}
+                        onChange={(event) => setSearch(event.target.value)}
+                        placeholder={t('Search equipment')}
+                        aria-label={t('Search equipment')}
+                    />
+                    <Button type="submit" variant="outline">
+                        {t('Search')}
+                    </Button>
+                    {filters.search && (
+                        <Button type="button" variant="ghost" onClick={clearSearch}>
+                            {t('Clear')}
+                        </Button>
+                    )}
+                </form>
+
                 <div className="rounded-xl border">
                     {equipment.data.length === 0 ? (
                         <div className="text-muted-foreground p-8 text-center text-sm">
@@ -287,6 +324,25 @@ export default function Equipment() {
                         ))
                     )}
                 </div>
+
+                {(equipment.prev_page_url || equipment.next_page_url) && (
+                    <div className="flex justify-between">
+                        {equipment.prev_page_url ? (
+                            <Button asChild variant="outline" size="sm">
+                                <Link href={equipment.prev_page_url} preserveState preserveScroll>
+                                    {t('Previous')}
+                                </Link>
+                            </Button>
+                        ) : <span />}
+                        {equipment.next_page_url && (
+                            <Button asChild variant="outline" size="sm">
+                                <Link href={equipment.next_page_url} preserveState preserveScroll>
+                                    {t('Next')}
+                                </Link>
+                            </Button>
+                        )}
+                    </div>
+                )}
             </div>
         </>
     );

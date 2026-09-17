@@ -101,3 +101,13 @@ test('schedule requires a valid interval', function () {
         'interval_days' => 0,
     ])->assertSessionHasErrors('interval_days');
 });
+
+test('schedule rejects intervals beyond the supported maximum', function () {
+    $company = Company::factory()->create();
+    $user = User::factory()->forCompany($company)->admin()->create();
+    $equipment = Equipment::factory()->forCompany($company)->create();
+
+    $this->actingAs($user)->post(route('equipment.maintenance', $equipment), [
+        'interval_days' => 3651,
+    ])->assertSessionHasErrors('interval_days');
+});
