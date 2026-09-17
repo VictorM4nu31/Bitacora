@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 type Photo = {
     id: number;
     original_name: string;
+    caption: string | null;
     url: string;
 };
 
@@ -26,6 +27,7 @@ export default function PhotoGallery({ photoUploadUrl, initial, canUpload }: Pro
     const [photos, setPhotos] = useState<Photo[]>(initial);
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [caption, setCaption] = useState('');
     const inputRef = useRef<HTMLInputElement | null>(null);
 
     async function onFiles() {
@@ -38,6 +40,7 @@ export default function PhotoGallery({ photoUploadUrl, initial, canUpload }: Pro
 
         const form = new FormData();
         form.append('photo', file);
+        if (caption.trim()) form.append('caption', caption.trim());
 
         try {
             const response = await fetch(photoUploadUrl, {
@@ -56,6 +59,7 @@ export default function PhotoGallery({ photoUploadUrl, initial, canUpload }: Pro
             const data = (await response.json()) as Photo;
             setPhotos((prev) => [...prev, data]);
             input.value = '';
+            setCaption('');
         } catch {
             setError(
                 t('Could not upload the photo. Check the format and size.'),
@@ -68,6 +72,15 @@ export default function PhotoGallery({ photoUploadUrl, initial, canUpload }: Pro
     return (
         <div className="space-y-4">
             <div className="flex items-center gap-3">
+                {canUpload && (
+                    <input
+                        value={caption}
+                        onChange={(event) => setCaption(event.target.value)}
+                        placeholder={t('Caption')}
+                        aria-label={t('Caption')}
+                        className="border-input h-9 rounded-md border bg-transparent px-3 text-sm"
+                    />
+                )}
                 {canUpload && <input
                     ref={inputRef}
                     type="file"
@@ -112,6 +125,11 @@ export default function PhotoGallery({ photoUploadUrl, initial, canUpload }: Pro
                                 alt={photo.original_name}
                                 className="aspect-video w-full object-cover"
                             />
+                            {photo.caption && (
+                                <p className="px-2 py-1 text-xs text-muted-foreground">
+                                    {photo.caption}
+                                </p>
+                            )}
                         </div>
                     ))}
                 </div>

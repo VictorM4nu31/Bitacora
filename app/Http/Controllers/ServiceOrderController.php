@@ -95,6 +95,7 @@ class ServiceOrderController extends Controller
             ->map(fn ($photo) => [
                 'id' => $photo->id,
                 'original_name' => $photo->original_name,
+                'caption' => $photo->caption,
                 'url' => route('service-photos.file', $photo),
             ])
             ->values();

@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\ReportStatus;
 use App\Models\ServiceReport;
 use App\Models\User;
 
@@ -21,6 +22,7 @@ class ServiceReportPolicy
     public function update(User $user, ServiceReport $report): bool
     {
         return $user->company_id === $report->company_id
+            && $report->status === ReportStatus::Draft
             && ($user->isAdmin() || $user->hasPermissionTo('update reports'));
     }
 
@@ -30,6 +32,7 @@ class ServiceReportPolicy
     public function finalize(User $user, ServiceReport $report): bool
     {
         return $user->company_id === $report->company_id
+            && $report->status === ReportStatus::Draft
             && ($user->isAdmin() || $user->hasPermissionTo('finalize reports'));
     }
 
@@ -39,6 +42,7 @@ class ServiceReportPolicy
     public function generatePdf(User $user, ServiceReport $report): bool
     {
         return $user->company_id === $report->company_id
+            && $report->status === ReportStatus::Finalized
             && ($user->isAdmin() || $user->hasPermissionTo('generate pdf'));
     }
 
@@ -48,6 +52,7 @@ class ServiceReportPolicy
     public function share(User $user, ServiceReport $report): bool
     {
         return $user->company_id === $report->company_id
+            && $report->status === ReportStatus::Finalized
             && ($user->isAdmin() || $user->hasPermissionTo('share reports'));
     }
 }

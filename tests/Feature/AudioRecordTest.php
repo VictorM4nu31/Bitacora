@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Permission\Models\Role;
 
 test('a technician can upload a voice note to their service order', function () {
     Storage::fake('local');
@@ -50,6 +51,20 @@ test('a user cannot upload audio to a service order from another company', funct
 
     $this->actingAs($user)->postJson(route('service-orders.audio', $orderB), [
         'audio' => $file,
+    ])->assertForbidden();
+});
+
+test('a user with view-only access cannot upload audio', function () {
+    Storage::fake('local');
+    Queue::fake();
+
+    $company = Company::factory()->create();
+    $user = User::factory()->create(['company_id' => $company->id]);
+    $user->assignRole(Role::findOrCreate('viewer')->syncPermissions(['view services']));
+    $order = ServiceOrder::factory()->forCompany($company)->create();
+
+    $this->actingAs($user)->postJson(route('service-orders.audio', $order), [
+        'audio' => UploadedFile::fake()->create('nota.webm', 100, 'audio/webm'),
     ])->assertForbidden();
 });
 

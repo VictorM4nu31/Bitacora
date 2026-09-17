@@ -81,7 +81,7 @@ type PageProps = {
     audioUrl: string;
     audioRecords: AudioItem[];
     photoUploadUrl: string;
-    photos: { id: number; original_name: string; url: string }[];
+    photos: { id: number; original_name: string; caption: string | null; url: string }[];
     report: Report | null;
     audit: Audit | null;
     reportOptions: {
