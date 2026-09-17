@@ -38,7 +38,11 @@ type Option = {
 };
 
 type PageProps = {
-    orders: { data: OrderItem[] };
+    orders: {
+        data: OrderItem[];
+        prev_page_url: string | null;
+        next_page_url: string | null;
+    };
     statuses: Option[];
     customers: { id: number; name: string }[];
     equipment: { id: number; name: string; customer_id: number }[];
@@ -53,10 +57,11 @@ const STATUS_STYLES: Record<string, string> = {
 
 export default function ServiceOrders() {
     const { t } = useTranslation();
-    const { orders, statuses, customers, equipment } =
+    const { orders, statuses, customers, equipment, filters } =
         usePage<PageProps>().props;
     const can = useCan();
     const [open, setOpen] = useState(false);
+    const [search, setSearch] = useState(filters.search);
 
     const form = useForm({
         customer_id: '',
@@ -74,6 +79,20 @@ export default function ServiceOrders() {
                 setOpen(false);
             },
         });
+    }
+
+    function searchServices(event: FormEvent) {
+        event.preventDefault();
+
+        router.get(index.url(), { search: search.trim() }, {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    }
+
+    function clearSearch() {
+        setSearch('');
+        router.get(index.url(), {}, { preserveState: true, preserveScroll: true });
     }
 
     const statusLabel = (value: string) =>
@@ -152,14 +171,16 @@ export default function ServiceOrders() {
                                             />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {equipment.map((item) => (
+                                                {equipment
+                                                    .filter((item) => item.customer_id === Number(form.data.customer_id))
+                                                    .map((item) => (
                                                 <SelectItem
                                                     key={item.id}
                                                     value={String(item.id)}
                                                 >
                                                     {item.name}
                                                 </SelectItem>
-                                            ))}
+                                                    ))}
                                         </SelectContent>
                                     </Select>
                                     <InputError
@@ -205,9 +226,26 @@ export default function ServiceOrders() {
                             </form>
                         </DialogContent>
                      </Dialog>}
-                </div>
+                 </div>
 
-                <div className="rounded-xl border">
+                <form onSubmit={searchServices} className="flex gap-2">
+                    <Input
+                        value={search}
+                        onChange={(event) => setSearch(event.target.value)}
+                        placeholder={t('Search services')}
+                        aria-label={t('Search services')}
+                    />
+                    <Button type="submit" variant="outline">
+                        {t('Search')}
+                    </Button>
+                    {filters.search && (
+                        <Button type="button" variant="ghost" onClick={clearSearch}>
+                            {t('Clear')}
+                        </Button>
+                    )}
+                </form>
+
+                 <div className="rounded-xl border">
                     {orders.data.length === 0 ? (
                         <div className="text-muted-foreground p-8 text-center text-sm">
                             {t('No services yet. Create the first one.')}
@@ -242,8 +280,27 @@ export default function ServiceOrders() {
                                 </div>
                             </Link>
                         ))
-                    )}
-                </div>
+                     )}
+                 </div>
+
+                {(orders.prev_page_url || orders.next_page_url) && (
+                    <div className="flex justify-between">
+                        {orders.prev_page_url ? (
+                            <Button asChild variant="outline" size="sm">
+                                <Link href={orders.prev_page_url} preserveState preserveScroll>
+                                    {t('Previous')}
+                                </Link>
+                            </Button>
+                        ) : <span />}
+                        {orders.next_page_url && (
+                            <Button asChild variant="outline" size="sm">
+                                <Link href={orders.next_page_url} preserveState preserveScroll>
+                                    {t('Next')}
+                                </Link>
+                            </Button>
+                        )}
+                    </div>
+                )}
             </div>
         </>
     );

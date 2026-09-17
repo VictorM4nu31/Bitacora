@@ -24,10 +24,13 @@ class StoreServiceOrderRequest extends FormRequest
     public function rules(): array
     {
         $companyId = $this->user()->company_id;
+        $customerId = $this->integer('customer_id');
 
         return [
             'customer_id' => ['required', 'integer', Rule::exists('customers', 'id')->where('company_id', $companyId)],
-            'equipment_id' => ['nullable', 'integer', Rule::exists('equipment', 'id')->where('company_id', $companyId)],
+            'equipment_id' => ['nullable', 'integer', Rule::exists('equipment', 'id')
+                ->where('company_id', $companyId)
+                ->where('customer_id', $customerId)],
             'scheduled_at' => ['nullable', 'date'],
         ];
     }
