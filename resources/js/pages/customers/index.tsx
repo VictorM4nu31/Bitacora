@@ -1,4 +1,4 @@
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { useTranslation } from '@sematico/laravel-inertia-i18n-react';
 import { useState, type FormEvent } from 'react';
 import Heading from '@/components/heading';
@@ -26,14 +26,21 @@ type CustomerItem = {
 };
 
 type PageProps = {
-    customers: { data: CustomerItem[] };
+    customers: {
+        data: CustomerItem[];
+        prev_page_url: string | null;
+        next_page_url: string | null;
+    };
+    filters: { search: string };
 };
 
 export default function Customers() {
     const { t } = useTranslation();
     const { customers } = usePage<PageProps>().props;
+    const { filters } = usePage<PageProps>().props;
     const can = useCan();
     const [open, setOpen] = useState(false);
+    const [search, setSearch] = useState(filters.search);
 
     const form = useForm({
         name: '',
@@ -53,6 +60,20 @@ export default function Customers() {
                 setOpen(false);
             },
         });
+    }
+
+    function searchCustomers(event: FormEvent) {
+        event.preventDefault();
+
+        router.get(index.url(), { search: search.trim() }, {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    }
+
+    function clearSearch() {
+        setSearch('');
+        router.get(index.url(), {}, { preserveState: true, preserveScroll: true });
     }
 
     return (
@@ -178,6 +199,23 @@ export default function Customers() {
                      </Dialog>}
                 </div>
 
+                <form onSubmit={searchCustomers} className="flex gap-2">
+                    <Input
+                        value={search}
+                        onChange={(event) => setSearch(event.target.value)}
+                        placeholder={t('Search customers')}
+                        aria-label={t('Search customers')}
+                    />
+                    <Button type="submit" variant="outline">
+                        {t('Search')}
+                    </Button>
+                    {filters.search && (
+                        <Button type="button" variant="ghost" onClick={clearSearch}>
+                            {t('Clear')}
+                        </Button>
+                    )}
+                </form>
+
                 <div className="rounded-xl border">
                     {customers.data.length === 0 ? (
                         <div className="text-muted-foreground p-8 text-center text-sm">
@@ -204,6 +242,25 @@ export default function Customers() {
                         ))
                     )}
                 </div>
+
+                {(customers.prev_page_url || customers.next_page_url) && (
+                    <div className="flex justify-between">
+                        {customers.prev_page_url ? (
+                            <Button asChild variant="outline" size="sm">
+                                <Link href={customers.prev_page_url} preserveState preserveScroll>
+                                    {t('Previous')}
+                                </Link>
+                            </Button>
+                        ) : <span />}
+                        {customers.next_page_url && (
+                            <Button asChild variant="outline" size="sm">
+                                <Link href={customers.next_page_url} preserveState preserveScroll>
+                                    {t('Next')}
+                                </Link>
+                            </Button>
+                        )}
+                    </div>
+                )}
             </div>
         </>
     );

@@ -22,11 +22,22 @@ class CustomerController extends Controller
 
         $customers = Customer::query()
             ->forCompany($request->user()->company_id)
+            ->when($request->string('search')->trim()->value(), function ($query, string $search): void {
+                $query->where(function ($query) use ($search): void {
+                    $query->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%");
+                });
+            })
             ->orderByDesc('updated_at')
-            ->paginate(15);
+            ->paginate(15)
+            ->withQueryString();
 
         return Inertia::render('customers/index', [
             'customers' => $customers,
+            'filters' => [
+                'search' => $request->string('search')->trim()->value(),
+            ],
             'storeUrl' => route('customers.store'),
         ]);
     }

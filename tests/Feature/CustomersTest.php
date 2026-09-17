@@ -42,6 +42,53 @@ test('a technician only sees customers of their own company', function () {
         ->and($all)->toContain(Customer::where('name', 'Cliente A')->value('id'));
 });
 
+test('customers can be searched by name, email or phone', function () {
+    $company = Company::factory()->create();
+    $user = User::factory()->forCompany($company)->create();
+
+    Customer::factory()->forCompany($company)->create([
+        'name' => 'Oficina Norte',
+        'email' => 'norte@example.test',
+        'phone' => '5550001111',
+    ]);
+    Customer::factory()->forCompany($company)->create([
+        'name' => 'Taller Sur',
+        'email' => 'sur@example.test',
+        'phone' => '5550002222',
+    ]);
+
+    $response = $this->actingAs($user)->get(route('customers.index', [
+        'search' => 'norte@example.test',
+    ]));
+
+    $response->assertInertia(fn ($page) => $page
+        ->where('filters.search', 'norte@example.test')
+        ->has('customers.data', 1)
+        ->where('customers.data.0.name', 'Oficina Norte')
+    );
+});
+
+test('customer pagination preserves the search filter', function () {
+    $company = Company::factory()->create();
+    $user = User::factory()->forCompany($company)->create();
+
+    Customer::factory()->count(16)->forCompany($company)->create([
+        'name' => 'Cliente recurrente',
+    ]);
+
+    $response = $this->actingAs($user)->get(route('customers.index', [
+        'search' => 'recurrente',
+    ]));
+
+    $response->assertInertia(fn ($page) => $page
+        ->where('filters.search', 'recurrente')
+        ->has('customers.data', 15)
+        ->where('customers.next_page_url', fn (?string $url) => $url !== null
+            && str_contains($url, 'search=recurrente')
+        )
+    );
+});
+
 test('a technician cannot view a customer from another company', function () {
     $companyA = Company::factory()->create();
     $companyB = Company::factory()->create();
