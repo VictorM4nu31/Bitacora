@@ -3,6 +3,7 @@ import { useTranslation } from '@sematico/laravel-inertia-i18n-react';
 import { useState, type FormEvent } from 'react';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
+import { useCan } from '@/hooks/use-authorization';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -32,6 +33,7 @@ type PageProps = {
 export default function CustomerShow() {
     const { t } = useTranslation();
     const { customer } = usePage<PageProps>().props;
+    const can = useCan();
     const [editOpen, setEditOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
 
@@ -79,7 +81,7 @@ export default function CustomerShow() {
                     />
 
                     <div className="flex gap-2">
-                        <Dialog open={editOpen} onOpenChange={setEditOpen}>
+                        {can('update customers') && <Dialog open={editOpen} onOpenChange={setEditOpen}>
                             <DialogTrigger asChild>
                                 <Button variant="outline">{t('Edit')}</Button>
                             </DialogTrigger>
@@ -208,9 +210,9 @@ export default function CustomerShow() {
                                     </div>
                                 </form>
                             </DialogContent>
-                        </Dialog>
+                        </Dialog>}
 
-                        <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+                        {can('delete customers') && <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
                             <DialogTrigger asChild>
                                 <Button variant="destructive">
                                     {t('Delete')}
@@ -241,7 +243,7 @@ export default function CustomerShow() {
                                     </Button>
                                 </div>
                             </DialogContent>
-                        </Dialog>
+                        </Dialog>}
                     </div>
                 </div>
 

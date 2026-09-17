@@ -33,6 +33,10 @@ type Props = {
     finalizeUrl: string | null;
     pdfUrl: string | null;
     shareUrl: string | null;
+    canUpdate: boolean;
+    canFinalize: boolean;
+    canGeneratePdf: boolean;
+    canShare: boolean;
 };
 
 export default function ReportEditor({
@@ -42,6 +46,10 @@ export default function ReportEditor({
     finalizeUrl,
     pdfUrl,
     shareUrl,
+    canUpdate,
+    canFinalize,
+    canGeneratePdf,
+    canShare,
 }: Props) {
     const { t } = useTranslation();
     const form = useForm({
@@ -86,7 +94,7 @@ export default function ReportEditor({
                 <div className="flex items-center justify-between gap-2">
                     <Badge>{t('Finalized')}</Badge>
                     <div className="flex gap-2">
-                        {pdfUrl && (
+                        {pdfUrl && canGeneratePdf && (
                             <Button
                                 asChild
                                 variant="outline"
@@ -96,7 +104,7 @@ export default function ReportEditor({
                                 <a href={pdfUrl}>{t('Download PDF')}</a>
                             </Button>
                         )}
-                        {shareUrl && (
+                        {shareUrl && canShare && (
                             <Button size="sm" type="button" onClick={share}>
                                 {t('Share with customer')}
                             </Button>
@@ -261,21 +269,21 @@ export default function ReportEditor({
             </div>
 
             <div className="flex justify-end gap-2">
-                <Button
+                 {canUpdate && <Button
                     type="button"
                     variant="outline"
                     onClick={saveDraft}
                     disabled={form.processing}
                 >
                     {t('Save draft')}
-                </Button>
-                <Button
+                 </Button>}
+                 {canFinalize && <Button
                     type="button"
                     onClick={finalize}
                     disabled={form.processing}
                 >
                     {t('Confirm report')}
-                </Button>
+                 </Button>}
             </div>
         </div>
     );

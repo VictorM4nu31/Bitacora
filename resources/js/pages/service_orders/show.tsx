@@ -2,6 +2,7 @@ import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { useTranslation } from '@sematico/laravel-inertia-i18n-react';
 import { useState, type FormEvent } from 'react';
 import Heading from '@/components/heading';
+import { useCan } from '@/hooks/use-authorization';
 import PhotoGallery from '@/components/photo-gallery';
 import ReportEditor from '@/components/report-editor';
 import VoiceRecorder from '@/components/voice-recorder';
@@ -101,6 +102,7 @@ const STATUS_STYLES: Record<string, string> = {
 
 export default function ServiceOrderShow() {
     const { t } = useTranslation();
+    const can = useCan();
     const {
         order,
         statuses,
@@ -164,18 +166,18 @@ export default function ServiceOrderShow() {
                     />
 
                     <div className="flex gap-2">
-                        {order.status === 'pending' && (
+                        {can('update services') && order.status === 'pending' && (
                             <Button onClick={() => changeStatus('in_progress')}>
                                 {t('Start service')}
                             </Button>
                         )}
-                        {order.status === 'in_progress' && (
+                        {can('update services') && order.status === 'in_progress' && (
                             <Button onClick={() => changeStatus('completed')}>
                                 {t('Complete service')}
                             </Button>
                         )}
 
-                        <Dialog open={editOpen} onOpenChange={setEditOpen}>
+                        {can('update services') && <Dialog open={editOpen} onOpenChange={setEditOpen}>
                             <DialogTrigger asChild>
                                 <Button variant="outline">{t('Edit')}</Button>
                             </DialogTrigger>
@@ -294,9 +296,9 @@ export default function ServiceOrderShow() {
                                     </div>
                                 </form>
                             </DialogContent>
-                        </Dialog>
+                        </Dialog>}
 
-                        <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+                        {can('delete services') && <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
                             <DialogTrigger asChild>
                                 <Button variant="destructive">
                                     {t('Delete')}
@@ -328,7 +330,7 @@ export default function ServiceOrderShow() {
                                     </Button>
                                 </div>
                             </DialogContent>
-                        </Dialog>
+                        </Dialog>}
                     </div>
                 </div>
 
@@ -403,6 +405,10 @@ export default function ServiceOrderShow() {
                             finalizeUrl={reportOptions.finalizeUrl}
                             pdfUrl={reportOptions.pdfUrl}
                             shareUrl={reportOptions.shareUrl}
+                            canUpdate={can('update reports')}
+                            canFinalize={can('finalize reports')}
+                            canGeneratePdf={can('generate pdf')}
+                            canShare={can('share reports')}
                         />
                     </CardContent>
                 </Card>
@@ -415,6 +421,7 @@ export default function ServiceOrderShow() {
                         <VoiceRecorder
                             audioUrl={audioUrl}
                             initial={audioRecords}
+                            canUpload={can('update services')}
                         />
                     </CardContent>
                 </Card>
@@ -427,6 +434,7 @@ export default function ServiceOrderShow() {
                         <PhotoGallery
                             photoUploadUrl={photoUploadUrl}
                             initial={photos}
+                            canUpload={can('update services')}
                         />
                     </CardContent>
                 </Card>

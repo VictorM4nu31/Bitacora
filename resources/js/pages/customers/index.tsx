@@ -3,6 +3,7 @@ import { useTranslation } from '@sematico/laravel-inertia-i18n-react';
 import { useState, type FormEvent } from 'react';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
+import { useCan } from '@/hooks/use-authorization';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -31,6 +32,7 @@ type PageProps = {
 export default function Customers() {
     const { t } = useTranslation();
     const { customers } = usePage<PageProps>().props;
+    const can = useCan();
     const [open, setOpen] = useState(false);
 
     const form = useForm({
@@ -66,7 +68,7 @@ export default function Customers() {
                         )}
                     />
 
-                    <Dialog open={open} onOpenChange={setOpen}>
+                     {can('create customers') && <Dialog open={open} onOpenChange={setOpen}>
                         <DialogTrigger asChild>
                             <Button>{t('New customer')}</Button>
                         </DialogTrigger>
@@ -173,7 +175,7 @@ export default function Customers() {
                                 </div>
                             </form>
                         </DialogContent>
-                    </Dialog>
+                     </Dialog>}
                 </div>
 
                 <div className="rounded-xl border">

@@ -14,6 +14,7 @@ type AudioItem = {
 type Props = {
     audioUrl: string;
     initial: AudioItem[];
+    canUpload: boolean;
 };
 
 type Phase = 'idle' | 'recording' | 'uploading' | 'done' | 'error';
@@ -39,7 +40,7 @@ const STATUS_LABELS: Record<string, string> = {
     failed: 'Error',
 };
 
-export default function VoiceRecorder({ audioUrl, initial }: Props) {
+export default function VoiceRecorder({ audioUrl, initial, canUpload }: Props) {
     const [phase, setPhase] = useState<Phase>('idle');
     const [error, setError] = useState<string | null>(null);
     const [elapsed, setElapsed] = useState(0);
@@ -233,18 +234,18 @@ export default function VoiceRecorder({ audioUrl, initial }: Props) {
     return (
         <div className="space-y-4">
             <div className="flex items-center gap-3">
-                {phase === 'recording' ? (
+                {canUpload && phase === 'recording' ? (
                     <Button variant="destructive" onClick={stopRecording}>
                         ⏺ {t('Stop')} ({minutes}:{seconds})
                     </Button>
-                ) : (
+                ) : canUpload ? (
                     <Button
                         onClick={startRecording}
                         disabled={phase === 'uploading'}
                     >
                         🎙️ {t('Record voice note')}
                     </Button>
-                )}
+                ) : null}
 
                 {phase === 'uploading' && (
                     <span className="text-muted-foreground text-sm">

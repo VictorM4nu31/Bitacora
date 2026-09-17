@@ -3,6 +3,7 @@ import { useTranslation } from '@sematico/laravel-inertia-i18n-react';
 import { useState, type FormEvent } from 'react';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
+import { useCan } from '@/hooks/use-authorization';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -64,6 +65,7 @@ type PageProps = {
 
 export default function EquipmentShow() {
     const { t } = useTranslation();
+    const can = useCan();
     const {
         equipment,
         history,
@@ -141,7 +143,7 @@ export default function EquipmentShow() {
                     />
 
                     <div className="flex gap-2">
-                        <Dialog open={editOpen} onOpenChange={setEditOpen}>
+                        {can('update equipment') && <Dialog open={editOpen} onOpenChange={setEditOpen}>
                             <DialogTrigger asChild>
                                 <Button variant="outline">{t('Edit')}</Button>
                             </DialogTrigger>
@@ -327,9 +329,9 @@ export default function EquipmentShow() {
                                     </div>
                                 </form>
                             </DialogContent>
-                        </Dialog>
+                        </Dialog>}
 
-                        <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+                        {can('delete equipment') && <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
                             <DialogTrigger asChild>
                                 <Button variant="destructive">
                                     {t('Delete')}
@@ -360,7 +362,7 @@ export default function EquipmentShow() {
                                     </Button>
                                 </div>
                             </DialogContent>
-                        </Dialog>
+                        </Dialog>}
                     </div>
                 </div>
 
@@ -415,7 +417,7 @@ export default function EquipmentShow() {
                         <CardTitle>{t('Scheduled maintenance')}</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <form
+                        {can('manage maintenance') && <form
                             onSubmit={scheduleMaintenance}
                             className="flex items-end gap-2"
                         >
@@ -446,7 +448,7 @@ export default function EquipmentShow() {
                             >
                                 {t('Schedule')}
                             </Button>
-                        </form>
+                        </form>}
 
                         {maintenance.length === 0 ? (
                             <p className="text-muted-foreground text-sm">
@@ -474,13 +476,15 @@ export default function EquipmentShow() {
                                                     : t('Paused')}
                                             </p>
                                         </div>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => complete(item)}
-                                        >
-                                            {t('Mark as done')}
-                                        </Button>
+                                         {can('manage maintenance') && (
+                                             <Button
+                                                 variant="outline"
+                                                 size="sm"
+                                                 onClick={() => complete(item)}
+                                             >
+                                                 {t('Mark as done')}
+                                             </Button>
+                                         )}
                                     </li>
                                 ))}
                             </ul>

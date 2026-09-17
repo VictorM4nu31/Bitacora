@@ -11,6 +11,7 @@ type Photo = {
 type Props = {
     photoUploadUrl: string;
     initial: Photo[];
+    canUpload: boolean;
 };
 
 function getCookie(name: string): string | null {
@@ -20,7 +21,7 @@ function getCookie(name: string): string | null {
     return match ? decodeURIComponent(match[2]) : null;
 }
 
-export default function PhotoGallery({ photoUploadUrl, initial }: Props) {
+export default function PhotoGallery({ photoUploadUrl, initial, canUpload }: Props) {
     const { t } = useTranslation();
     const [photos, setPhotos] = useState<Photo[]>(initial);
     const [uploading, setUploading] = useState(false);
@@ -67,21 +68,21 @@ export default function PhotoGallery({ photoUploadUrl, initial }: Props) {
     return (
         <div className="space-y-4">
             <div className="flex items-center gap-3">
-                <input
+                {canUpload && <input
                     ref={inputRef}
                     type="file"
                     accept="image/jpeg,image/png,image/webp"
                     className="hidden"
                     onChange={onFiles}
-                />
-                <Button
+                />}
+                {canUpload && <Button
                     type="button"
                     variant="outline"
                     disabled={uploading}
                     onClick={() => inputRef.current?.click()}
                 >
                     {t('Upload photo')}
-                </Button>
+                </Button>}
                 {uploading && (
                     <span className="text-muted-foreground text-sm">
                         {t('Uploading…')}
