@@ -18,10 +18,10 @@ class AudioRecordController extends Controller
      */
     public function store(StoreAudioRequest $request, ServiceOrder $serviceOrder): JsonResponse
     {
-        Gate::authorize('view', $serviceOrder);
+        Gate::authorize('update', $serviceOrder);
 
         $file = $request->file('audio');
-        $extension = $file->clientExtension();
+        $extension = $file->clientExtension() ?: 'webm';
 
         $path = $file->storeAs(
             sprintf('voice/%s/%s/%s', $serviceOrder->company_id, now()->format('Y/m'), Str::uuid()),

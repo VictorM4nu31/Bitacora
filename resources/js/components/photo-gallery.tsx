@@ -5,24 +5,29 @@ import { Button } from '@/components/ui/button';
 type Photo = {
     id: number;
     original_name: string;
+    caption: string | null;
     url: string;
 };
 
 type Props = {
     photoUploadUrl: string;
     initial: Photo[];
+    canUpload: boolean;
 };
 
 function getCookie(name: string): string | null {
-    const match = document.cookie.match(new RegExp('(^|;\\s*)' + name + '=([^;]*)'));
+    const match = document.cookie.match(
+        new RegExp('(^|;\\s*)' + name + '=([^;]*)'),
+    );
     return match ? decodeURIComponent(match[2]) : null;
 }
 
-export default function PhotoGallery({ photoUploadUrl, initial }: Props) {
+export default function PhotoGallery({ photoUploadUrl, initial, canUpload }: Props) {
     const { t } = useTranslation();
     const [photos, setPhotos] = useState<Photo[]>(initial);
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [caption, setCaption] = useState('');
     const inputRef = useRef<HTMLInputElement | null>(null);
 
     async function onFiles() {
@@ -35,6 +40,7 @@ export default function PhotoGallery({ photoUploadUrl, initial }: Props) {
 
         const form = new FormData();
         form.append('photo', file);
+        if (caption.trim()) form.append('caption', caption.trim());
 
         try {
             const response = await fetch(photoUploadUrl, {
@@ -53,8 +59,11 @@ export default function PhotoGallery({ photoUploadUrl, initial }: Props) {
             const data = (await response.json()) as Photo;
             setPhotos((prev) => [...prev, data]);
             input.value = '';
+            setCaption('');
         } catch {
-            setError(t('Could not upload the photo. Check the format and size.'));
+            setError(
+                t('Could not upload the photo. Check the format and size.'),
+            );
         } finally {
             setUploading(false);
         }
@@ -63,25 +72,42 @@ export default function PhotoGallery({ photoUploadUrl, initial }: Props) {
     return (
         <div className="space-y-4">
             <div className="flex items-center gap-3">
-                <input
+                {canUpload && (
+                    <input
+                        value={caption}
+                        onChange={(event) => setCaption(event.target.value)}
+                        placeholder={t('Caption')}
+                        aria-label={t('Caption')}
+                        className="border-input h-9 rounded-md border bg-transparent px-3 text-sm"
+                    />
+                )}
+                {canUpload && <input
                     ref={inputRef}
                     type="file"
                     accept="image/jpeg,image/png,image/webp"
                     className="hidden"
                     onChange={onFiles}
-                />
-                <Button
+                />}
+                {canUpload && <Button
                     type="button"
                     variant="outline"
                     disabled={uploading}
                     onClick={() => inputRef.current?.click()}
                 >
                     {t('Upload photo')}
-                </Button>
-                {uploading && <span className="text-muted-foreground text-sm">{t('Uploading…')}</span>}
+                </Button>}
+                {uploading && (
+                    <span className="text-muted-foreground text-sm">
+                        {t('Uploading…')}
+                    </span>
+                )}
             </div>
 
-            {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+            {error && (
+                <p className="text-sm text-red-600 dark:text-red-400">
+                    {error}
+                </p>
+            )}
 
             {photos.length === 0 ? (
                 <p className="text-muted-foreground text-sm">
@@ -90,12 +116,20 @@ export default function PhotoGallery({ photoUploadUrl, initial }: Props) {
             ) : (
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
                     {photos.map((photo) => (
-                        <div key={photo.id} className="overflow-hidden rounded-lg border">
+                        <div
+                            key={photo.id}
+                            className="overflow-hidden rounded-lg border"
+                        >
                             <img
                                 src={photo.url}
                                 alt={photo.original_name}
                                 className="aspect-video w-full object-cover"
                             />
+                            {photo.caption && (
+                                <p className="px-2 py-1 text-xs text-muted-foreground">
+                                    {photo.caption}
+                                </p>
+                            )}
                         </div>
                     ))}
                 </div>

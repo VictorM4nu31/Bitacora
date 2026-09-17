@@ -1,8 +1,9 @@
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { useTranslation } from '@sematico/laravel-inertia-i18n-react';
 import { useState, type FormEvent } from 'react';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
+import { useCan } from '@/hooks/use-authorization';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -25,13 +26,21 @@ type CustomerItem = {
 };
 
 type PageProps = {
-    customers: { data: CustomerItem[] };
+    customers: {
+        data: CustomerItem[];
+        prev_page_url: string | null;
+        next_page_url: string | null;
+    };
+    filters: { search: string };
 };
 
 export default function Customers() {
     const { t } = useTranslation();
     const { customers } = usePage<PageProps>().props;
+    const { filters } = usePage<PageProps>().props;
+    const can = useCan();
     const [open, setOpen] = useState(false);
+    const [search, setSearch] = useState(filters.search);
 
     const form = useForm({
         name: '',
@@ -53,6 +62,20 @@ export default function Customers() {
         });
     }
 
+    function searchCustomers(event: FormEvent) {
+        event.preventDefault();
+
+        router.get(index.url(), { search: search.trim() }, {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    }
+
+    function clearSearch() {
+        setSearch('');
+        router.get(index.url(), {}, { preserveState: true, preserveScroll: true });
+    }
+
     return (
         <>
             <Head title={t('Customers')} />
@@ -61,10 +84,12 @@ export default function Customers() {
                 <div className="flex items-center justify-between">
                     <Heading
                         title={t('Customers')}
-                        description={t('Your company customers and their equipment')}
+                        description={t(
+                            'Your company customers and their equipment',
+                        )}
                     />
 
-                    <Dialog open={open} onOpenChange={setOpen}>
+                     {can('create customers') && <Dialog open={open} onOpenChange={setOpen}>
                         <DialogTrigger asChild>
                             <Button>{t('New customer')}</Button>
                         </DialogTrigger>
@@ -79,7 +104,9 @@ export default function Customers() {
                                     <Input
                                         id="name"
                                         value={form.data.name}
-                                        onChange={(e) => form.setData('name', e.target.value)}
+                                        onChange={(e) =>
+                                            form.setData('name', e.target.value)
+                                        }
                                         placeholder="Nombre del cliente"
                                         autoFocus
                                     />
@@ -91,7 +118,12 @@ export default function Customers() {
                                     <Input
                                         id="phone"
                                         value={form.data.phone}
-                                        onChange={(e) => form.setData('phone', e.target.value)}
+                                        onChange={(e) =>
+                                            form.setData(
+                                                'phone',
+                                                e.target.value,
+                                            )
+                                        }
                                         placeholder="55 1234 5678"
                                     />
                                     <InputError message={form.errors.phone} />
@@ -103,18 +135,30 @@ export default function Customers() {
                                         id="email"
                                         type="email"
                                         value={form.data.email}
-                                        onChange={(e) => form.setData('email', e.target.value)}
+                                        onChange={(e) =>
+                                            form.setData(
+                                                'email',
+                                                e.target.value,
+                                            )
+                                        }
                                         placeholder="cliente@correo.com"
                                     />
                                     <InputError message={form.errors.email} />
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="address">{t('Address')}</Label>
+                                    <Label htmlFor="address">
+                                        {t('Address')}
+                                    </Label>
                                     <Input
                                         id="address"
                                         value={form.data.address}
-                                        onChange={(e) => form.setData('address', e.target.value)}
+                                        onChange={(e) =>
+                                            form.setData(
+                                                'address',
+                                                e.target.value,
+                                            )
+                                        }
                                     />
                                     <InputError message={form.errors.address} />
                                 </div>
@@ -124,7 +168,12 @@ export default function Customers() {
                                     <textarea
                                         id="notes"
                                         value={form.data.notes}
-                                        onChange={(e) => form.setData('notes', e.target.value)}
+                                        onChange={(e) =>
+                                            form.setData(
+                                                'notes',
+                                                e.target.value,
+                                            )
+                                        }
                                         className="border-input min-h-20 w-full rounded-md border bg-transparent px-3 py-2 text-sm"
                                     />
                                     <InputError message={form.errors.notes} />
@@ -138,14 +187,34 @@ export default function Customers() {
                                     >
                                         {t('Cancel')}
                                     </Button>
-                                    <Button type="submit" disabled={form.processing}>
+                                    <Button
+                                        type="submit"
+                                        disabled={form.processing}
+                                    >
                                         {t('Save')}
                                     </Button>
                                 </div>
                             </form>
                         </DialogContent>
-                    </Dialog>
+                     </Dialog>}
                 </div>
+
+                <form onSubmit={searchCustomers} className="flex gap-2">
+                    <Input
+                        value={search}
+                        onChange={(event) => setSearch(event.target.value)}
+                        placeholder={t('Search customers')}
+                        aria-label={t('Search customers')}
+                    />
+                    <Button type="submit" variant="outline">
+                        {t('Search')}
+                    </Button>
+                    {filters.search && (
+                        <Button type="button" variant="ghost" onClick={clearSearch}>
+                            {t('Clear')}
+                        </Button>
+                    )}
+                </form>
 
                 <div className="rounded-xl border">
                     {customers.data.length === 0 ? (
@@ -157,18 +226,41 @@ export default function Customers() {
                             <Link
                                 key={customer.id}
                                 href={show.url({ customer: customer.id })}
-                                className="hover:bg-muted grid border-b px-4 py-3 transition-colors last:border-b-0 dark:hover:bg-muted/40"
+                                className="hover:bg-muted dark:hover:bg-muted/40 grid border-b px-4 py-3 transition-colors last:border-b-0"
                             >
                                 <div className="min-w-0">
-                                    <p className="truncate font-medium">{customer.name}</p>
+                                    <p className="truncate font-medium">
+                                        {customer.name}
+                                    </p>
                                     <p className="text-muted-foreground text-sm">
-                                        {customer.phone ?? customer.email ?? t('No contact')}
+                                        {customer.phone ??
+                                            customer.email ??
+                                            t('No contact')}
                                     </p>
                                 </div>
                             </Link>
                         ))
                     )}
                 </div>
+
+                {(customers.prev_page_url || customers.next_page_url) && (
+                    <div className="flex justify-between">
+                        {customers.prev_page_url ? (
+                            <Button asChild variant="outline" size="sm">
+                                <Link href={customers.prev_page_url} preserveState preserveScroll>
+                                    {t('Previous')}
+                                </Link>
+                            </Button>
+                        ) : <span />}
+                        {customers.next_page_url && (
+                            <Button asChild variant="outline" size="sm">
+                                <Link href={customers.next_page_url} preserveState preserveScroll>
+                                    {t('Next')}
+                                </Link>
+                            </Button>
+                        )}
+                    </div>
+                )}
             </div>
         </>
     );
@@ -177,7 +269,7 @@ export default function Customers() {
 Customers.layout = {
     breadcrumbs: [
         {
-            title: 'Clientes',
+            title: 'Customers',
             href: index.url(),
         },
     ],

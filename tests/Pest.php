@@ -1,5 +1,6 @@
 <?php
 
+use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -17,6 +18,21 @@ use Tests\TestCase;
 pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
     ->in('Feature');
+
+/*
+|--------------------------------------------------------------------------
+| Roles y permisos
+|--------------------------------------------------------------------------
+|
+| Los roles y permisos de spatie se siembran en cada test para que los
+| factories (forCompany asigna "technician") tengan sus permisos aplicados
+| y las policies de RBAC resuelvan correctamente.
+|
+*/
+
+uses()->beforeEach(function () {
+    $this->seed(RolesAndPermissionsSeeder::class);
+})->in('Feature');
 
 /*
 |--------------------------------------------------------------------------

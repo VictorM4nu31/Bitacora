@@ -30,12 +30,24 @@ class ServiceOrderController extends Controller
         $orders = ServiceOrder::query()
             ->forCompany($request->user()->company_id)
             ->with(['customer:id,name', 'equipment:id,name', 'technician:id,name'])
+            ->when($request->string('search')->trim()->value(), function ($query, string $search): void {
+                $query->where(function ($query) use ($search): void {
+                    $query->whereHas('customer', fn ($customerQuery) => $customerQuery->where('name', 'like', "%{$search}%")
+                    )->orWhereHas('equipment', fn ($equipmentQuery) => $equipmentQuery->where('name', 'like', "%{$search}%")
+                    )->orWhereHas('technician', fn ($technicianQuery) => $technicianQuery->where('name', 'like', "%{$search}%")
+                    );
+                });
+            })
             ->orderByDesc('updated_at')
-            ->paginate(15);
+            ->paginate(15)
+            ->withQueryString();
 
         return Inertia::render('service_orders/index', [
             'orders' => $orders,
             'statuses' => $this->statusOptions(),
+            'filters' => [
+                'search' => $request->string('search')->trim()->value(),
+            ],
             ...$this->formOptions($request),
         ]);
     }
@@ -83,6 +95,7 @@ class ServiceOrderController extends Controller
             ->map(fn ($photo) => [
                 'id' => $photo->id,
                 'original_name' => $photo->original_name,
+                'caption' => $photo->caption,
                 'url' => route('service-photos.file', $photo),
             ])
             ->values();

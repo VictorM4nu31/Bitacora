@@ -32,7 +32,9 @@ export default function Security(props: Props) {
                 <Heading
                     variant="small"
                     title={t('Update password')}
-                    description={t('Ensure your account is using a long, random password to stay secure')}
+                    description={t(
+                        'Ensure your account is using a long, random password to stay secure',
+                    )}
                 />
 
                 <Form
@@ -61,7 +63,7 @@ export default function Security(props: Props) {
                         <>
                             <div className="grid gap-2">
                                 <Label htmlFor="current_password">
-                                    Current password
+                                    {t('Current password')}
                                 </Label>
 
                                 <PasswordInput
@@ -77,7 +79,7 @@ export default function Security(props: Props) {
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="password">New password</Label>
+                                <Label htmlFor="password">{t('New password')}</Label>
 
                                 <PasswordInput
                                     id="password"
@@ -94,7 +96,7 @@ export default function Security(props: Props) {
 
                             <div className="grid gap-2">
                                 <Label htmlFor="password_confirmation">
-                                    Confirm password
+                                    {t('Confirm password')}
                                 </Label>
 
                                 <PasswordInput
@@ -116,7 +118,7 @@ export default function Security(props: Props) {
                                     disabled={processing}
                                     data-test="update-password-button"
                                 >
-                                    Save
+                                    {t('Save')}
                                 </Button>
                             </div>
                         </>

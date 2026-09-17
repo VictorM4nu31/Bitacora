@@ -1,8 +1,5 @@
 {
-    "agents": [
-        "antigravity",
-        "opencode"
-    ],
+    "agents": ["antigravity", "opencode"],
     "cloud": false,
     "guidelines": true,
     "mcp": true,

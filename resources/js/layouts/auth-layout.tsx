@@ -12,16 +12,15 @@ export default function AuthLayout({
     children: React.ReactNode;
 }) {
     return (
-        <>
-            <div className="absolute top-4 right-4">
-                <LocaleSwitcher />
-            </div>
-            <I18nProvider>
+        <I18nProvider>
+            <>
+                <div className="absolute top-4 right-4">
+                    <LocaleSwitcher />
+                </div>
                 <AuthLayoutTemplate title={title} description={description}>
                     {children}
                 </AuthLayoutTemplate>
-            </I18nProvider>
-        </>
+            </>
+        </I18nProvider>
     );
 }
-

@@ -30,12 +30,16 @@ class UpdateServiceOrderRequest extends FormRequest
     public function rules(): array
     {
         $companyId = $this->user()->company_id;
+        $order = $this->route('service_order');
+        $customerId = $this->integer('customer_id') ?: ($order instanceof ServiceOrder ? $order->customer_id : null);
 
         return [
             'status' => ['sometimes', 'string', Rule::enum(ServiceOrderStatus::class)],
             'scheduled_at' => ['nullable', 'date'],
             'customer_id' => ['sometimes', 'integer', Rule::exists('customers', 'id')->where('company_id', $companyId)],
-            'equipment_id' => ['sometimes', 'nullable', 'integer', Rule::exists('equipment', 'id')->where('company_id', $companyId)],
+            'equipment_id' => ['sometimes', 'nullable', 'integer', Rule::exists('equipment', 'id')
+                ->where('company_id', $companyId)
+                ->where('customer_id', $customerId)],
         ];
     }
 }

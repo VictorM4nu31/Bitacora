@@ -18,7 +18,7 @@ class ServicePhotoController extends Controller
      */
     public function store(StorePhotoRequest $request, ServiceOrder $serviceOrder): JsonResponse
     {
-        Gate::authorize('view', $serviceOrder);
+        Gate::authorize('update', $serviceOrder);
 
         $file = $request->file('photo');
         $extension = $file->clientExtension() ?: 'jpg';
@@ -36,12 +36,14 @@ class ServicePhotoController extends Controller
             'original_name' => $file->getClientOriginalName(),
             'mime' => $file->getMimeType(),
             'size' => $file->getSize(),
+            'caption' => $request->validated('caption'),
         ]);
 
         return response()->json([
             'id' => $photo->id,
             'url' => route('service-photos.file', $photo),
             'original_name' => $photo->original_name,
+            'caption' => $photo->caption,
         ]);
     }
 
@@ -60,7 +62,7 @@ class ServicePhotoController extends Controller
      */
     public function destroy(ServicePhoto $servicePhoto): JsonResponse
     {
-        Gate::authorize('view', $servicePhoto->serviceOrder);
+        Gate::authorize('update', $servicePhoto->serviceOrder);
 
         Storage::disk($servicePhoto->disk)->delete($servicePhoto->path);
         $servicePhoto->delete();

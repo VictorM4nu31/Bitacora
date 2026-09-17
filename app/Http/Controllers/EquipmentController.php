@@ -28,11 +28,25 @@ class EquipmentController extends Controller
         $equipment = Equipment::query()
             ->forCompany($request->user()->company_id)
             ->with('customer:id,name')
+            ->when($request->string('search')->trim()->value(), function ($query, string $search): void {
+                $query->where(function ($query) use ($search): void {
+                    $query->where('name', 'like', "%{$search}%")
+                        ->orWhere('brand', 'like', "%{$search}%")
+                        ->orWhere('model', 'like', "%{$search}%")
+                        ->orWhere('serial_number', 'like', "%{$search}%")
+                        ->orWhereHas('customer', fn ($customerQuery) => $customerQuery->where('name', 'like', "%{$search}%")
+                        );
+                });
+            })
             ->orderByDesc('updated_at')
-            ->paginate(15);
+            ->paginate(15)
+            ->withQueryString();
 
         return Inertia::render('equipment/index', [
             'equipment' => $equipment,
+            'filters' => [
+                'search' => $request->string('search')->trim()->value(),
+            ],
             ...$this->formOptions($request),
         ]);
     }

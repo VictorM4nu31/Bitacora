@@ -60,7 +60,9 @@ export default function Profile() {
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="email">{t('Email address')}</Label>
+                                <Label htmlFor="email">
+                                    {t('Email address')}
+                                </Label>
 
                                 <Input
                                     id="email"
@@ -100,7 +102,7 @@ export default function Profile() {
 Profile.layout = {
     breadcrumbs: [
         {
-            title: t('Profile settings'),
+            title: 'Profile settings',
             href: edit(),
         },
     ],

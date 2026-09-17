@@ -274,8 +274,9 @@ export default function TwoFactorSetupModal({
         if (showVerificationStep) {
             return {
                 title: t('Verify authentication code'),
-                description:
-                    t('Enter the 6-digit code from your authenticator app'),
+                description: t(
+                    'Enter the 6-digit code from your authenticator app',
+                ),
                 buttonText: t('Continue'),
             };
         }

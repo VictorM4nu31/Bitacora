@@ -28,7 +28,7 @@ class CustomerPolicy
      */
     public function create(User $user): bool
     {
-        return $user->company_id !== null;
+        return $user->isAdmin() || $user->hasPermissionTo('create customers');
     }
 
     /**
@@ -36,7 +36,8 @@ class CustomerPolicy
      */
     public function update(User $user, Customer $customer): bool
     {
-        return $user->company_id === $customer->company_id;
+        return $user->company_id === $customer->company_id
+            && ($user->isAdmin() || $user->hasPermissionTo('update customers'));
     }
 
     /**
@@ -44,6 +45,7 @@ class CustomerPolicy
      */
     public function delete(User $user, Customer $customer): bool
     {
-        return $user->company_id === $customer->company_id;
+        return $user->company_id === $customer->company_id
+            && ($user->isAdmin() || $user->hasPermissionTo('delete customers'));
     }
 }

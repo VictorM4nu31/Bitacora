@@ -1,4 +1,5 @@
 import { Head } from '@inertiajs/react';
+import { useTranslation } from '@sematico/laravel-inertia-i18n-react';
 import AppearanceTabs from '@/components/appearance-tabs';
 import Heading from '@/components/heading';
 import { edit as editAppearance } from '@/routes/appearance';
@@ -10,13 +11,15 @@ export default function Appearance() {
         <>
             <Head title={t('Appearance settings')} />
 
-            <h1 className="sr-only">Appearance settings</h1>
+            <h1 className="sr-only">{t('Appearance settings')}</h1>
 
             <div className="space-y-6">
                 <Heading
                     variant="small"
                     title={t('Appearance settings')}
-                    description={t('Update the appearance settings for your account')}
+                    description={t(
+                        'Update the appearance settings for your account',
+                    )}
                 />
                 <AppearanceTabs />
             </div>

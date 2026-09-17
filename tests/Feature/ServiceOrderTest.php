@@ -3,6 +3,7 @@
 use App\Enums\ServiceOrderStatus;
 use App\Models\Company;
 use App\Models\Customer;
+use App\Models\Equipment;
 use App\Models\ServiceOrder;
 use App\Models\User;
 
@@ -40,6 +41,44 @@ test('a technician cannot create a service order for a customer from another com
     $this->actingAs($user)->post(route('service-orders.store'), [
         'customer_id' => $customerB->id,
     ])->assertSessionHasErrors('customer_id');
+});
+
+test('a service order cannot use equipment owned by another customer', function () {
+    $company = Company::factory()->create();
+    $user = User::factory()->forCompany($company)->create();
+    $customer = Customer::factory()->forCompany($company)->create();
+    $otherCustomer = Customer::factory()->forCompany($company)->create();
+    $equipment = Equipment::factory()->forCompany($company)->forCustomer($otherCustomer)->create();
+
+    $this->actingAs($user)->post(route('service-orders.store'), [
+        'customer_id' => $customer->id,
+        'equipment_id' => $equipment->id,
+    ])->assertSessionHasErrors('equipment_id');
+});
+
+test('service orders can be searched and paginated by related records', function () {
+    $company = Company::factory()->create();
+    $user = User::factory()->forCompany($company)->create();
+    $customer = Customer::factory()->forCompany($company)->create([
+        'name' => 'Clinica Central',
+    ]);
+
+    ServiceOrder::factory()->count(16)->forCompany($company)->create([
+        'customer_id' => $customer->id,
+        'technician_id' => $user->id,
+    ]);
+
+    $response = $this->actingAs($user)->get(route('service-orders.index', [
+        'search' => 'Clinica Central',
+    ]));
+
+    $response->assertInertia(fn ($page) => $page
+        ->where('filters.search', 'Clinica Central')
+        ->has('orders.data', 15)
+        ->where('orders.next_page_url', fn (?string $url) => $url !== null
+            && str_contains(urldecode($url), 'search=Clinica Central')
+        )
+    );
 });
 
 test('a technician only sees service orders of their own company', function () {
@@ -101,9 +140,9 @@ test('completing a service sets the completed timestamp', function () {
         ->and($order->fresh()->completed_at)->not->toBeNull();
 });
 
-test('a service order can be deleted by its company member', function () {
+test('a service order can be deleted by an admin of its company', function () {
     $company = Company::factory()->create();
-    $user = User::factory()->forCompany($company)->create();
+    $user = User::factory()->forCompany($company)->admin()->create();
     $order = ServiceOrder::factory()->forCompany($company)->create([
         'technician_id' => $user->id,
         'customer_id' => Customer::factory()->forCompany($company),

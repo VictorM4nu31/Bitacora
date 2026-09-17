@@ -63,6 +63,55 @@ test('a technician only sees equipment of their own company', function () {
         ->and($all)->toContain(Equipment::where('name', 'Equipo A')->value('id'));
 });
 
+test('equipment can be searched by equipment, customer, brand or serial number', function () {
+    $company = Company::factory()->create();
+    $user = User::factory()->forCompany($company)->create();
+    $customer = Customer::factory()->forCompany($company)->create([
+        'name' => 'Clinica Central',
+    ]);
+
+    Equipment::factory()->forCompany($company)->forCustomer($customer)->create([
+        'name' => 'Compresor principal',
+        'brand' => 'FrioMax',
+        'serial_number' => 'FM-001',
+    ]);
+    Equipment::factory()->forCompany($company)->create([
+        'name' => 'Bomba secundaria',
+        'serial_number' => 'BS-002',
+    ]);
+
+    $response = $this->actingAs($user)->get(route('equipment.index', [
+        'search' => 'FM-001',
+    ]));
+
+    $response->assertInertia(fn ($page) => $page
+        ->where('filters.search', 'FM-001')
+        ->has('equipment.data', 1)
+        ->where('equipment.data.0.name', 'Compresor principal')
+    );
+});
+
+test('equipment pagination preserves the search filter', function () {
+    $company = Company::factory()->create();
+    $user = User::factory()->forCompany($company)->create();
+
+    Equipment::factory()->count(16)->forCompany($company)->create([
+        'name' => 'Equipo recurrente',
+    ]);
+
+    $response = $this->actingAs($user)->get(route('equipment.index', [
+        'search' => 'recurrente',
+    ]));
+
+    $response->assertInertia(fn ($page) => $page
+        ->where('filters.search', 'recurrente')
+        ->has('equipment.data', 15)
+        ->where('equipment.next_page_url', fn (?string $url) => $url !== null
+            && str_contains($url, 'search=recurrente')
+        )
+    );
+});
+
 test('a technician cannot view or update equipment from another company', function () {
     $companyA = Company::factory()->create();
     $companyB = Company::factory()->create();
@@ -95,9 +144,9 @@ test('a customer has many equipment through the relation', function () {
     expect($customer->equipment()->count())->toBe(2);
 });
 
-test('equipment can be deleted (soft) by its company member', function () {
+test('equipment can be deleted (soft) by an admin of its company', function () {
     $company = Company::factory()->create();
-    $user = User::factory()->forCompany($company)->create();
+    $user = User::factory()->forCompany($company)->admin()->create();
     $equipment = Equipment::factory()->forCompany($company)->create();
 
     $this->actingAs($user)->delete(route('equipment.destroy', $equipment))

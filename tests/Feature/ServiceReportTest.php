@@ -96,6 +96,35 @@ test('a technician cannot update a report from another company', function () {
     ])->assertForbidden();
 });
 
+test('a finalized report cannot be changed through the update endpoint', function () {
+    $company = Company::factory()->create();
+    $user = User::factory()->forCompany($company)->create();
+    $order = ServiceOrder::factory()->forCompany($company)->create([
+        'technician_id' => $user->id,
+        'customer_id' => Customer::factory()->forCompany($company),
+    ]);
+    $report = ServiceReport::factory()->forServiceOrder($order)->status(ReportStatus::Finalized)->create();
+
+    $this->actingAs($user)->put(route('service-reports.update', $report), [
+        'problem' => 'intentento de cambio',
+    ])->assertForbidden();
+});
+
+test('a draft report cannot be downloaded or shared before finalization', function () {
+    Storage::fake('local');
+
+    $company = Company::factory()->create();
+    $user = User::factory()->forCompany($company)->create();
+    $order = ServiceOrder::factory()->forCompany($company)->create([
+        'technician_id' => $user->id,
+        'customer_id' => Customer::factory()->forCompany($company),
+    ]);
+    $report = ServiceReport::factory()->forServiceOrder($order)->status(ReportStatus::Draft)->create();
+
+    $this->actingAs($user)->get(route('service-reports.pdf', $report))->assertForbidden();
+    $this->actingAs($user)->getJson(route('service-reports.share', $report))->assertForbidden();
+});
+
 test('finalizing a report marks the service order as completed', function () {
     $company = Company::factory()->create();
     $user = User::factory()->forCompany($company)->create();

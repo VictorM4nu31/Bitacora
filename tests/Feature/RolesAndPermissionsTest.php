@@ -1,7 +1,12 @@
 <?php
 
+use App\Models\Company;
+use App\Models\Customer;
+use App\Models\Equipment;
+use App\Models\ServiceOrder;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
+use Illuminate\Support\Collection;
 use Spatie\Permission\Models\Role;
 
 test('the roles seeder creates admin and technician roles with permissions', function () {
@@ -34,4 +39,94 @@ test('a user role can be checked via the hasRole helper', function () {
     $user = User::factory()->technician()->create();
 
     expect($user->hasRole('technician'))->toBeTrue();
+});
+
+test('a technician cannot delete customers, equipment or service orders', function () {
+    $company = Company::factory()->create();
+    $user = User::factory()->forCompany($company)->create();
+
+    $customer = Customer::factory()->forCompany($company)->create();
+    $equipment = Equipment::factory()->forCompany($company)->create();
+    $order = ServiceOrder::factory()->forCompany($company)->create([
+        'customer_id' => $customer->id,
+        'equipment_id' => $equipment->id,
+        'technician_id' => $user->id,
+    ]);
+
+    $this->actingAs($user)->delete(route('customers.destroy', $customer))->assertForbidden();
+    $this->actingAs($user)->delete(route('equipment.destroy', $equipment))->assertForbidden();
+    $this->actingAs($user)->delete(route('service-orders.destroy', $order))->assertForbidden();
+});
+
+test('an admin can delete customers, equipment and service orders', function () {
+    $company = Company::factory()->create();
+    $user = User::factory()->forCompany($company)->admin()->create();
+
+    $customer = Customer::factory()->forCompany($company)->create();
+    $equipment = Equipment::factory()->forCompany($company)->create();
+    $order = ServiceOrder::factory()->forCompany($company)->create([
+        'customer_id' => $customer->id,
+        'equipment_id' => $equipment->id,
+        'technician_id' => $user->id,
+    ]);
+
+    $this->actingAs($user)->delete(route('customers.destroy', $customer))
+        ->assertRedirect(route('customers.index'));
+    $this->actingAs($user)->delete(route('equipment.destroy', $equipment))
+        ->assertRedirect(route('equipment.index'));
+    $this->actingAs($user)->delete(route('service-orders.destroy', $order))
+        ->assertRedirect(route('service-orders.index'));
+});
+
+test('a technician cannot manage maintenance; only admins can', function () {
+    $company = Company::factory()->create();
+    $technician = User::factory()->forCompany($company)->create();
+    $admin = User::factory()->forCompany($company)->admin()->create();
+    $equipment = Equipment::factory()->forCompany($company)->create();
+
+    $this->actingAs($technician)->post(route('equipment.maintenance', $equipment), [
+        'interval_days' => 30,
+    ])->assertForbidden();
+
+    $this->actingAs($admin)->post(route('equipment.maintenance', $equipment), [
+        'interval_days' => 30,
+    ])->assertRedirect(route('equipment.show', $equipment));
+});
+
+test('authenticated inertia pages share the current user permissions', function () {
+    $company = Company::factory()->create();
+    $technician = User::factory()->forCompany($company)->create();
+
+    $this->actingAs($technician)
+        ->get(route('customers.index'))
+        ->assertInertia(fn ($page) => $page
+            ->where('auth.permissions', fn (Collection $permissions) => $permissions->contains('create customers')
+                && ! $permissions->contains('delete customers')
+            )
+        );
+});
+
+test('technicians cannot execute destructive actions through direct routes', function () {
+    $company = Company::factory()->create();
+    $technician = User::factory()->forCompany($company)->create();
+    $customer = Customer::factory()->forCompany($company)->create();
+    $equipment = Equipment::factory()->forCompany($company)->create([
+        'customer_id' => $customer->id,
+    ]);
+    $order = ServiceOrder::factory()->forCompany($company)->create([
+        'customer_id' => $customer->id,
+        'equipment_id' => $equipment->id,
+        'technician_id' => $technician->id,
+    ]);
+
+    $this->actingAs($technician)->delete(route('customers.destroy', $customer))
+        ->assertForbidden();
+    $this->actingAs($technician)->delete(route('equipment.destroy', $equipment))
+        ->assertForbidden();
+    $this->actingAs($technician)->delete(route('service-orders.destroy', $order))
+        ->assertForbidden();
+
+    expect($customer->fresh())->not->toBeNull()
+        ->and($equipment->fresh())->not->toBeNull()
+        ->and($order->fresh())->not->toBeNull();
 });

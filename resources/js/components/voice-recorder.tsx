@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from '@sematico/laravel-inertia-i18n-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,12 +14,15 @@ type AudioItem = {
 type Props = {
     audioUrl: string;
     initial: AudioItem[];
+    canUpload: boolean;
 };
 
 type Phase = 'idle' | 'recording' | 'uploading' | 'done' | 'error';
 
 function getCookie(name: string): string | null {
-    const match = document.cookie.match(new RegExp('(^|;\\s*)' + name + '=([^;]*)'));
+    const match = document.cookie.match(
+        new RegExp('(^|;\\s*)' + name + '=([^;]*)'),
+    );
     return match ? decodeURIComponent(match[2]) : null;
 }
 
@@ -37,7 +40,7 @@ const STATUS_LABELS: Record<string, string> = {
     failed: 'Error',
 };
 
-export default function VoiceRecorder({ audioUrl, initial }: Props) {
+export default function VoiceRecorder({ audioUrl, initial, canUpload }: Props) {
     const [phase, setPhase] = useState<Phase>('idle');
     const [error, setError] = useState<string | null>(null);
     const [elapsed, setElapsed] = useState(0);
@@ -74,12 +77,18 @@ export default function VoiceRecorder({ audioUrl, initial }: Props) {
                         stream.getTracks().forEach((track) => track.stop());
                     }
 
-                    const duration = Math.round(Date.now() - startTimeRef.current);
-                    const blob = new Blob(chunksRef.current, { type: recorder.mimeType });
+                    const duration = Math.round(
+                        Date.now() - startTimeRef.current,
+                    );
+                    const blob = new Blob(chunksRef.current, {
+                        type: recorder.mimeType,
+                    });
 
                     if (blob.size === 0) {
                         setPhase('idle');
-                        setError(t('The recording was empty. Please try again.'));
+                        setError(
+                            t('The recording was empty. Please try again.'),
+                        );
                         return;
                     }
 
@@ -93,28 +102,67 @@ export default function VoiceRecorder({ audioUrl, initial }: Props) {
             })
             .catch(() => {
                 setPhase('idle');
-                setError(t('Could not access the microphone. Check your permissions.'));
+                setError(
+                    t(
+                        'Could not access the microphone. Check your permissions.',
+                    ),
+                );
             });
     }
 
-    useEffect(() => {
-        const active = items.filter(
-            (item) => item.statusUrl && (item.status === 'uploaded' || item.status === 'processing'),
-        );
+    const itemsRef = useRef<AudioItem[]>(items);
 
-        if (active.length === 0) return;
+    useEffect(() => {
+        itemsRef.current = items;
+    }, [items]);
+
+    // Identifica los items activos por sus ids. Como el conjunto de ids no cambia
+    // mientras se actualiza el estado interno, la firma es estable y el efecto
+    // no se vuelve a suscribir en cada tick (evita polls solapados).
+    const activeSignature = useMemo(
+        () =>
+            items
+                .filter(
+                    (item) =>
+                        item.statusUrl &&
+                        (item.status === 'uploaded' ||
+                            item.status === 'processing'),
+                )
+                .map((item) => item.id)
+                .join(','),
+        [items],
+    );
+
+    useEffect(() => {
+        if (activeSignature === '') return;
 
         const poll = async () => {
+            const active = itemsRef.current.filter(
+                (item) =>
+                    item.statusUrl &&
+                    (item.status === 'uploaded' ||
+                        item.status === 'processing'),
+            );
+
             for (const item of active) {
                 if (!item.statusUrl) continue;
                 try {
-                    const res = await fetch(item.statusUrl, { headers: { Accept: 'application/json' } });
+                    const res = await fetch(item.statusUrl, {
+                        headers: { Accept: 'application/json' },
+                    });
                     if (!res.ok) continue;
-                    const data = (await res.json()) as AudioItem & { statusLabel?: string };
+                    const data = (await res.json()) as AudioItem & {
+                        statusLabel?: string;
+                    };
                     setItems((prev) =>
                         prev.map((i) =>
                             i.id === data.id
-                                ? { ...i, status: data.status, transcript: data.transcript ?? i.transcript }
+                                ? {
+                                      ...i,
+                                      status: data.status,
+                                      transcript:
+                                          data.transcript ?? i.transcript,
+                                  }
                                 : i,
                         ),
                     );
@@ -130,7 +178,7 @@ export default function VoiceRecorder({ audioUrl, initial }: Props) {
         return () => {
             if (pollingRef.current) window.clearInterval(pollingRef.current);
         };
-    }, [items]);
+    }, [activeSignature]);
 
     function stopRecording() {
         if (timerRef.current) window.clearInterval(timerRef.current);
@@ -163,13 +211,20 @@ export default function VoiceRecorder({ audioUrl, initial }: Props) {
                 statusUrl: string;
             };
             setItems((prev) => [
-                { id: data.id, status: data.status, duration_ms: duration, statusUrl: data.statusUrl },
+                {
+                    id: data.id,
+                    status: data.status,
+                    duration_ms: duration,
+                    statusUrl: data.statusUrl,
+                },
                 ...prev,
             ]);
             setPhase('done');
         } catch {
             setPhase('error');
-            setError(t('Could not upload the voice note. Check your connection.'));
+            setError(
+                t('Could not upload the voice note. Check your connection.'),
+            );
         }
     }
 
@@ -179,21 +234,23 @@ export default function VoiceRecorder({ audioUrl, initial }: Props) {
     return (
         <div className="space-y-4">
             <div className="flex items-center gap-3">
-                {phase === 'recording' ? (
+                {canUpload && phase === 'recording' ? (
                     <Button variant="destructive" onClick={stopRecording}>
                         ⏺ {t('Stop')} ({minutes}:{seconds})
                     </Button>
-                ) : (
+                ) : canUpload ? (
                     <Button
                         onClick={startRecording}
                         disabled={phase === 'uploading'}
                     >
                         🎙️ {t('Record voice note')}
                     </Button>
-                )}
+                ) : null}
 
                 {phase === 'uploading' && (
-                    <span className="text-muted-foreground text-sm">{t('Uploading…')}</span>
+                    <span className="text-muted-foreground text-sm">
+                        {t('Uploading…')}
+                    </span>
                 )}
                 {phase === 'done' && (
                     <span className="text-sm text-green-600 dark:text-green-400">
@@ -202,7 +259,11 @@ export default function VoiceRecorder({ audioUrl, initial }: Props) {
                 )}
             </div>
 
-            {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+            {error && (
+                <p className="text-sm text-red-600 dark:text-red-400">
+                    {error}
+                </p>
+            )}
 
             {items.length > 0 && (
                 <ul className="space-y-2">
@@ -218,15 +279,22 @@ export default function VoiceRecorder({ audioUrl, initial }: Props) {
                                         ? ` (${Math.round(item.duration_ms / 1000)}s)`
                                         : ''}
                                 </span>
-                                <Badge variant="secondary" className={STATUS_STYLES[item.status]}>
-                                    {t(STATUS_LABELS[item.status] ?? item.status)}
+                                <Badge
+                                    variant="secondary"
+                                    className={STATUS_STYLES[item.status]}
+                                >
+                                    {t(
+                                        STATUS_LABELS[item.status] ??
+                                            item.status,
+                                    )}
                                 </Badge>
                             </div>
-                            {item.status === 'transcribed' && item.transcript && (
-                                <p className="text-foreground mt-2 line-clamp-3 whitespace-pre-wrap">
-                                    {item.transcript}
-                                </p>
-                            )}
+                            {item.status === 'transcribed' &&
+                                item.transcript && (
+                                    <p className="text-foreground mt-2 line-clamp-3 whitespace-pre-wrap">
+                                        {item.transcript}
+                                    </p>
+                                )}
                         </li>
                     ))}
                 </ul>

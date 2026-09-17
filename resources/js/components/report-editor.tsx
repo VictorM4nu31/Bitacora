@@ -33,6 +33,10 @@ type Props = {
     finalizeUrl: string | null;
     pdfUrl: string | null;
     shareUrl: string | null;
+    canUpdate: boolean;
+    canFinalize: boolean;
+    canGeneratePdf: boolean;
+    canShare: boolean;
 };
 
 export default function ReportEditor({
@@ -42,6 +46,10 @@ export default function ReportEditor({
     finalizeUrl,
     pdfUrl,
     shareUrl,
+    canUpdate,
+    canFinalize,
+    canGeneratePdf,
+    canShare,
 }: Props) {
     const { t } = useTranslation();
     const form = useForm({
@@ -58,7 +66,9 @@ export default function ReportEditor({
     if (!report) {
         return (
             <p className="text-muted-foreground text-sm">
-                {t('The report will be generated automatically when the voice note is processed.')}
+                {t(
+                    'The report will be generated automatically when the voice note is processed.',
+                )}
             </p>
         );
     }
@@ -66,7 +76,9 @@ export default function ReportEditor({
     async function share() {
         if (!shareUrl) return;
         try {
-            const res = await fetch(shareUrl, { headers: { Accept: 'application/json' } });
+            const res = await fetch(shareUrl, {
+                headers: { Accept: 'application/json' },
+            });
             if (!res.ok) throw new Error('share failed');
             const data = (await res.json()) as { url: string };
             await navigator.clipboard.writeText(data.url);
@@ -82,12 +94,17 @@ export default function ReportEditor({
                 <div className="flex items-center justify-between gap-2">
                     <Badge>{t('Finalized')}</Badge>
                     <div className="flex gap-2">
-                        {pdfUrl && (
-                            <Button asChild variant="outline" size="sm" type="button">
+                        {pdfUrl && canGeneratePdf && (
+                            <Button
+                                asChild
+                                variant="outline"
+                                size="sm"
+                                type="button"
+                            >
                                 <a href={pdfUrl}>{t('Download PDF')}</a>
                             </Button>
                         )}
-                        {shareUrl && (
+                        {shareUrl && canShare && (
                             <Button size="sm" type="button" onClick={share}>
                                 {t('Share with customer')}
                             </Button>
@@ -96,32 +113,50 @@ export default function ReportEditor({
                 </div>
                 {report.arrival_time && (
                     <p>
-                        <span className="text-muted-foreground">{t('Arrival')}:</span> {report.arrival_time}
+                        <span className="text-muted-foreground">
+                            {t('Arrival')}:
+                        </span>{' '}
+                        {report.arrival_time}
                     </p>
                 )}
                 {report.problem && (
                     <p>
-                        <span className="text-muted-foreground">{t('Problem')}:</span> {report.problem}
+                        <span className="text-muted-foreground">
+                            {t('Problem')}:
+                        </span>{' '}
+                        {report.problem}
                     </p>
                 )}
                 {report.diagnosis && (
                     <p>
-                        <span className="text-muted-foreground">{t('Diagnosis')}:</span> {report.diagnosis}
+                        <span className="text-muted-foreground">
+                            {t('Diagnosis')}:
+                        </span>{' '}
+                        {report.diagnosis}
                     </p>
                 )}
                 {report.work_done && (
                     <p>
-                        <span className="text-muted-foreground">{t('Work done')}:</span> {report.work_done}
+                        <span className="text-muted-foreground">
+                            {t('Work done')}:
+                        </span>{' '}
+                        {report.work_done}
                     </p>
                 )}
                 {report.result && (
                     <p>
-                        <span className="text-muted-foreground">{t('Result')}:</span> {report.result}
+                        <span className="text-muted-foreground">
+                            {t('Result')}:
+                        </span>{' '}
+                        {report.result}
                     </p>
                 )}
                 {report.total_cost !== null && (
                     <p>
-                        <span className="text-muted-foreground">{t('Cost')}:</span> ${report.total_cost}
+                        <span className="text-muted-foreground">
+                            {t('Cost')}:
+                        </span>{' '}
+                        ${report.total_cost}
                     </p>
                 )}
             </div>
@@ -146,18 +181,22 @@ export default function ReportEditor({
                     <Input
                         id="arrival_time"
                         value={form.data.arrival_time}
-                        onChange={(e) => form.setData('arrival_time', e.target.value)}
+                        onChange={(e) =>
+                            form.setData('arrival_time', e.target.value)
+                        }
                         placeholder="10:20"
                     />
                 </div>
                 <div className="grid gap-2">
-                    <Label htmlFor="equipment_type">{t('Equipment type')}</Label>
+                    <Label htmlFor="equipment_type">
+                        {t('Equipment type')}
+                    </Label>
                     <Select
                         value={String(form.data.equipment_type)}
                         onValueChange={(v) => form.setData('equipment_type', v)}
                     >
                         <SelectTrigger>
-                            <SelectValue placeholder="{t('Select a type')}" />
+                            <SelectValue placeholder={t('Select a type')} />
                         </SelectTrigger>
                         <SelectContent>
                             {types.map((type) => (
@@ -203,7 +242,9 @@ export default function ReportEditor({
                 <Input
                     id="tests_performed"
                     value={form.data.tests_performed}
-                    onChange={(e) => form.setData('tests_performed', e.target.value)}
+                    onChange={(e) =>
+                        form.setData('tests_performed', e.target.value)
+                    }
                 />
             </div>
 
@@ -228,12 +269,21 @@ export default function ReportEditor({
             </div>
 
             <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={saveDraft} disabled={form.processing}>
-                    Guardar borrador
-                </Button>
-                <Button type="button" onClick={finalize} disabled={form.processing}>
-                    Confirmar reporte
-                </Button>
+                 {canUpdate && <Button
+                    type="button"
+                    variant="outline"
+                    onClick={saveDraft}
+                    disabled={form.processing}
+                >
+                    {t('Save draft')}
+                 </Button>}
+                 {canFinalize && <Button
+                    type="button"
+                    onClick={finalize}
+                    disabled={form.processing}
+                >
+                    {t('Confirm report')}
+                 </Button>}
             </div>
         </div>
     );
