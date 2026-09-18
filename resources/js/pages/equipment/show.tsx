@@ -399,7 +399,9 @@ export default function EquipmentShow() {
                             <span className="text-muted-foreground">
                                 {t('Serial number')}:
                             </span>{' '}
-                            {equipment.serial_number ?? '—'}
+                            <span className="font-mono tabular-nums">
+                                {equipment.serial_number ?? '—'}
+                            </span>
                         </p>
                         {equipment.notes && (
                             <p>
@@ -439,7 +441,7 @@ export default function EquipmentShow() {
                                             e.target.value,
                                         )
                                     }
-                                    className="border-input h-9 rounded-md border bg-transparent px-3 text-sm"
+                                    className="border-input h-11 rounded-lg border-[1.5px] bg-card px-3 font-mono text-sm tabular-nums outline-none focus-visible:border-ring"
                                 />
                             </div>
                             <Button
@@ -461,14 +463,17 @@ export default function EquipmentShow() {
                                 {maintenance.map((item) => (
                                     <li
                                         key={item.id}
-                                        className="border-muted flex items-center justify-between rounded-lg border px-3 py-2 text-sm"
+                                        className="flex items-center justify-between gap-2 rounded-lg border-[1.5px] border-line border-l-4 border-l-witness bg-card px-3 py-2 text-sm"
                                     >
                                         <div>
                                             <p className="font-medium">
                                                 {item.next_due_at ??
                                                     t('No date')}{' '}
                                                 — {t('every')}{' '}
-                                                {item.interval_days} {t('days')}
+                                                <span className="font-mono tabular-nums">
+                                                    {item.interval_days}{' '}
+                                                    {t('days')}
+                                                </span>
                                             </p>
                                             <p className="text-muted-foreground text-xs">
                                                 {item.enabled
@@ -502,14 +507,15 @@ export default function EquipmentShow() {
                                 {t('This equipment has no services yet.')}
                             </p>
                         ) : (
-                            <ul className="space-y-2">
+                            <ul className="relative space-y-2 before:absolute before:top-2 before:bottom-2 before:left-[5px] before:border-l-[1.5px] before:border-line">
                                 {history.map((item) => (
-                                    <li key={item.id}>
+                                    <li key={item.id} className="relative pl-5">
+                                        <span className="absolute top-3 left-0 size-2.5 rounded-full border-[1.5px] border-primary bg-card" />
                                         <Link
                                             href={serviceOrderShow.url({
                                                 service_order: item.id,
                                             })}
-                                            className="hover:bg-muted flex items-center justify-between rounded-lg border px-3 py-2 text-sm transition-colors"
+                                            className="flex items-center justify-between rounded-lg border-[1.5px] border-line px-3 py-2 text-sm transition-colors hover:bg-accent/50"
                                         >
                                             <div>
                                                 <p className="font-medium">
