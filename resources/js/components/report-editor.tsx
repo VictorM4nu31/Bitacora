@@ -92,7 +92,12 @@ export default function ReportEditor({
         return (
             <div className="space-y-3 text-sm">
                 <div className="flex items-center justify-between gap-2">
-                    <Badge>{t('Finalized')}</Badge>
+                    <Badge
+                        variant="success"
+                        className="seal-stamp animate-seal-in px-3 py-1 text-xs"
+                    >
+                        {t('Finalized')}
+                    </Badge>
                     <div className="flex gap-2">
                         {pdfUrl && canGeneratePdf && (
                             <Button
@@ -185,6 +190,7 @@ export default function ReportEditor({
                             form.setData('arrival_time', e.target.value)
                         }
                         placeholder="10:20"
+                        className="font-mono tabular-nums"
                     />
                 </div>
                 <div className="grid gap-2">
@@ -233,7 +239,7 @@ export default function ReportEditor({
                     id="work_done"
                     value={form.data.work_done}
                     onChange={(e) => form.setData('work_done', e.target.value)}
-                    className="border-input min-h-20 w-full rounded-md border bg-transparent px-3 py-2 text-sm"
+                    className="border-input min-h-20 w-full rounded-lg border-[1.5px] bg-card px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
                 />
             </div>
 
@@ -265,6 +271,7 @@ export default function ReportEditor({
                     step="0.01"
                     value={String(form.data.total_cost)}
                     onChange={(e) => form.setData('total_cost', e.target.value)}
+                    className="font-mono tabular-nums"
                 />
             </div>
 
@@ -279,6 +286,7 @@ export default function ReportEditor({
                  </Button>}
                  {canFinalize && <Button
                     type="button"
+                    variant="signal"
                     onClick={finalize}
                     disabled={form.processing}
                 >

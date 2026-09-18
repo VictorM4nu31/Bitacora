@@ -93,11 +93,14 @@ type PageProps = {
     };
 };
 
-const STATUS_STYLES: Record<string, string> = {
-    pending: 'text-amber-700 bg-amber-500/10 dark:text-amber-400',
-    in_progress: 'text-blue-700 bg-blue-500/10 dark:text-blue-400',
-    completed: 'text-green-700 bg-green-500/10 dark:text-green-400',
-    cancelled: 'text-muted-foreground bg-muted',
+const STATUS_VARIANTS: Record<
+    string,
+    'witness' | 'info' | 'success' | 'secondary'
+> = {
+    pending: 'witness',
+    in_progress: 'info',
+    completed: 'success',
+    cancelled: 'secondary',
 };
 
 export default function ServiceOrderShow() {
@@ -336,14 +339,13 @@ export default function ServiceOrderShow() {
 
                 <div className="flex">
                     <Badge
-                        variant="secondary"
-                        className={STATUS_STYLES[order.status]}
+                        variant={STATUS_VARIANTS[order.status] ?? 'secondary'}
                     >
                         {statusLabel}
                     </Badge>
                 </div>
 
-                <Card>
+                <Card className="order-band">
                     <CardHeader>
                         <CardTitle>{t('Information')}</CardTitle>
                     </CardHeader>
@@ -417,7 +419,7 @@ export default function ServiceOrderShow() {
                     <CardHeader>
                         <CardTitle>{t('Voice note')}</CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="rounded-b-[10px] bg-[#101413] p-5 text-[#F2EFE6]">
                         <VoiceRecorder
                             audioUrl={audioUrl}
                             initial={audioRecords}
@@ -446,7 +448,7 @@ export default function ServiceOrderShow() {
                         </CardHeader>
                         <CardContent className="space-y-3 text-sm">
                             {audit.ai && (
-                                <div className="grid gap-1 text-xs">
+                                <div className="grid gap-1 font-mono text-xs tabular-nums">
                                     <p className="text-muted-foreground">
                                         {t('Transcription')}:{' '}
                                         {audit.ai.transcription_provider ?? '—'}{' '}

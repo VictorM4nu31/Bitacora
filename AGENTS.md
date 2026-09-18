@@ -202,4 +202,21 @@ Use Wayfinder to generate TypeScript functions for Laravel routes. Import from `
 
 - IMPORTANT: Activate `inertia-react-development` when working with Inertia React client-side patterns.
 
+=== bitacora/project rules ===
+
+# Bitácora — Cuaderno de Taller (identidad vigente desde 2026-09-18)
+
+- El naranja `signal` (`#E4571D`/`#FF7A29`, variantes `signal`/`signal-solid`) es
+  solo para acción humana crítica: grabar nota de voz, confirmar reporte.
+  Nunca como decoración. Nunca texto blanco sobre `#E4571D` (falla AA); el
+  sólido naranja lleva tinta oscura `#1A1206` (`text-signal-foreground`).
+  Los badges de estado usan `witness`/`info`/`success`/`danger`.
+- Todo número medible (costos, series, horas, ms) va en mono tabular
+  (`font-mono tabular-nums`).
+- La marca es **Bitácora** (`APP_NAME=Bitácora`); no reintroducir "Laravel"
+  en nombre, `config/app.php` ni `.env.example`.
+- Cobertura de traducciones: toda clave literal usada en `t('...')` del
+  frontend debe existir en `lang/es.json` y `lang/en.json` (el inglés mapea
+  a la cadena fuente). `LocalizationTest` lo verifica automáticamente.
+
 </laravel-boost-guidelines>

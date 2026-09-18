@@ -216,23 +216,30 @@ export default function Customers() {
                     )}
                 </form>
 
-                <div className="rounded-xl border">
+                <div className="rounded-[10px] border-[1.5px] border-line bg-card">
                     {customers.data.length === 0 ? (
-                        <div className="text-muted-foreground p-8 text-center text-sm">
-                            {t('No customers yet. Create the first one.')}
+                        <div className="flex flex-col items-center gap-2 p-10 text-center">
+                            <p className="font-display text-lg font-bold">
+                                {t('No customers yet. Create the first one.')}
+                            </p>
+                            <p className="max-w-sm text-sm text-muted-foreground">
+                                {t(
+                                    'Customers group equipment and service history.',
+                                )}
+                            </p>
                         </div>
                     ) : (
                         customers.data.map((customer) => (
                             <Link
                                 key={customer.id}
                                 href={show.url({ customer: customer.id })}
-                                className="hover:bg-muted dark:hover:bg-muted/40 grid border-b px-4 py-3 transition-colors last:border-b-0"
+                                className="grid border-b border-line border-l-4 border-l-transparent px-4 py-4 transition-colors last:border-b-0 hover:border-l-primary hover:bg-accent/50"
                             >
                                 <div className="min-w-0">
-                                    <p className="truncate font-medium">
+                                    <p className="font-display truncate text-lg font-bold tracking-tight">
                                         {customer.name}
                                     </p>
-                                    <p className="text-muted-foreground text-sm">
+                                    <p className="text-sm text-muted-foreground">
                                         {customer.phone ??
                                             customer.email ??
                                             t('No contact')}
