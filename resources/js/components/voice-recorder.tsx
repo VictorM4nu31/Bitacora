@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from '@sematico/laravel-inertia-i18n-react';
+import { Mic, Square } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
@@ -26,12 +27,17 @@ function getCookie(name: string): string | null {
     return match ? decodeURIComponent(match[2]) : null;
 }
 
-const STATUS_STYLES: Record<string, string> = {
-    uploaded: 'text-blue-700 bg-blue-500/10 dark:text-blue-400',
-    processing: 'text-amber-700 bg-amber-500/10 dark:text-amber-400',
-    transcribed: 'text-green-700 bg-green-500/10 dark:text-green-400',
-    failed: 'text-red-700 bg-red-500/10 dark:text-red-400',
+const STATUS_VARIANTS: Record<string, 'witness' | 'info' | 'success' | 'danger'> = {
+    uploaded: 'info',
+    processing: 'witness',
+    transcribed: 'success',
+    failed: 'danger',
 };
+
+const WAVEFORM_BARS = [
+    10, 16, 22, 14, 26, 32, 20, 28, 18, 30, 24, 34, 22, 16, 28, 20, 26, 14,
+    24, 18, 30, 22, 16, 12,
+];
 
 const STATUS_LABELS: Record<string, string> = {
     uploaded: 'Uploaded',
@@ -232,37 +238,69 @@ export default function VoiceRecorder({ audioUrl, initial, canUpload }: Props) {
     const minutes = String(Math.floor(elapsed / 60)).padStart(2, '0');
 
     return (
-        <div className="space-y-4">
-            <div className="flex items-center gap-3">
+        <div className="space-y-4" aria-live="polite">
+            <div className="flex flex-wrap items-center gap-4">
                 {canUpload && phase === 'recording' ? (
-                    <Button variant="destructive" onClick={stopRecording}>
-                        ⏺ {t('Stop')} ({minutes}:{seconds})
+                    <Button
+                        variant="signal"
+                        size="lg"
+                        onClick={stopRecording}
+                        className="animate-record-pulse h-18 min-h-[72px] rounded-full px-6 py-4 text-base"
+                    >
+                        <Square className="size-5 fill-current" />
+                        {t('Stop')} ({minutes}:{seconds})
                     </Button>
                 ) : canUpload ? (
                     <Button
+                        variant="signal"
+                        size="lg"
                         onClick={startRecording}
                         disabled={phase === 'uploading'}
+                        className="min-h-[72px] rounded-full px-6 py-4 text-base"
                     >
-                        🎙️ {t('Record voice note')}
+                        <Mic className="size-5" />
+                        {t('Record voice note')}
                     </Button>
                 ) : null}
 
+                <div
+                    className="flex h-10 flex-1 items-center gap-[3px]"
+                    aria-hidden="true"
+                >
+                    {WAVEFORM_BARS.map((height, index) => (
+                        <span
+                            key={index}
+                            style={{
+                                height: `${height}px`,
+                                animationDelay: `${index * 90}ms`,
+                            }}
+                            className={
+                                phase === 'recording'
+                                    ? 'w-1 animate-pulse rounded-full bg-signal'
+                                    : 'w-1 rounded-full bg-white/20'
+                            }
+                        />
+                    ))}
+                </div>
+
+                <span className="font-mono text-2xl font-semibold tabular-nums">
+                    {minutes}:{seconds}
+                </span>
+
                 {phase === 'uploading' && (
-                    <span className="text-muted-foreground text-sm">
+                    <span className="text-sm text-white/70">
                         {t('Uploading…')}
                     </span>
                 )}
                 {phase === 'done' && (
-                    <span className="text-sm text-green-600 dark:text-green-400">
+                    <span className="text-sm text-emerald-300">
                         {t('Voice note saved')}
                     </span>
                 )}
             </div>
 
             {error && (
-                <p className="text-sm text-red-600 dark:text-red-400">
-                    {error}
-                </p>
+                <p className="text-sm text-red-300">{error}</p>
             )}
 
             {items.length > 0 && (
@@ -270,18 +308,24 @@ export default function VoiceRecorder({ audioUrl, initial, canUpload }: Props) {
                     {items.map((item) => (
                         <li
                             key={item.id}
-                            className="border-muted rounded-lg border px-3 py-2 text-sm"
+                            className="rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm"
                         >
-                            <div className="flex items-center justify-between">
-                                <span className="text-muted-foreground">
+                            <div className="flex items-center justify-between gap-2">
+                                <span className="text-white/70">
                                     {t('Voice note')}
                                     {item.duration_ms
                                         ? ` (${Math.round(item.duration_ms / 1000)}s)`
                                         : ''}
                                 </span>
                                 <Badge
-                                    variant="secondary"
-                                    className={STATUS_STYLES[item.status]}
+                                    variant={
+                                        STATUS_VARIANTS[item.status] ?? 'info'
+                                    }
+                                    className={
+                                        item.status === 'processing'
+                                            ? 'animate-processing'
+                                            : undefined
+                                    }
                                 >
                                     {t(
                                         STATUS_LABELS[item.status] ??
@@ -291,7 +335,7 @@ export default function VoiceRecorder({ audioUrl, initial, canUpload }: Props) {
                             </div>
                             {item.status === 'transcribed' &&
                                 item.transcript && (
-                                    <p className="text-foreground mt-2 line-clamp-3 whitespace-pre-wrap">
+                                    <p className="mt-2 line-clamp-3 whitespace-pre-wrap text-[#F2EFE6]">
                                         {item.transcript}
                                     </p>
                                 )}

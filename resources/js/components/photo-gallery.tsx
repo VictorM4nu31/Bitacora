@@ -71,14 +71,14 @@ export default function PhotoGallery({ photoUploadUrl, initial, canUpload }: Pro
 
     return (
         <div className="space-y-4">
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
                 {canUpload && (
                     <input
                         value={caption}
                         onChange={(event) => setCaption(event.target.value)}
                         placeholder={t('Caption')}
                         aria-label={t('Caption')}
-                        className="border-input h-9 rounded-md border bg-transparent px-3 text-sm"
+                        className="border-input h-11 rounded-lg border-[1.5px] bg-card px-3 text-sm outline-none focus-visible:border-ring"
                     />
                 )}
                 {canUpload && <input
@@ -116,21 +116,22 @@ export default function PhotoGallery({ photoUploadUrl, initial, canUpload }: Pro
             ) : (
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
                     {photos.map((photo) => (
-                        <div
+                        <figure
                             key={photo.id}
-                            className="overflow-hidden rounded-lg border"
+                            className="paper-card overflow-hidden rounded-lg bg-card"
                         >
                             <img
                                 src={photo.url}
                                 alt={photo.original_name}
+                                loading="lazy"
                                 className="aspect-video w-full object-cover"
                             />
                             {photo.caption && (
-                                <p className="px-2 py-1 text-xs text-muted-foreground">
+                                <figcaption className="border-t border-line px-2 py-1 text-xs text-muted-foreground">
                                     {photo.caption}
-                                </p>
+                                </figcaption>
                             )}
-                        </div>
+                        </figure>
                     ))}
                 </div>
             )}
